@@ -33,12 +33,12 @@ const Navbar = () => {
 
         <div className="flex gap-2">
           <Link href={"/pricing"}>
-            <Button size={"lg"} variant={"ghost"}>
-              Pricing
-            </Button>
+            <Button size={"lg"}>Get Started</Button>
           </Link>
           <Link href={"/panel"}>
-            <Button size={"lg"}>Sign In</Button>
+            <Button size={"lg"} variant={"ghost"}>
+              Sign In
+            </Button>
           </Link>
         </div>
       </Card>
