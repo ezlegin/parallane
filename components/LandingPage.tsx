@@ -5,6 +5,7 @@ import { Card, CardContent } from "./ui/card"
 import { Separator } from "./ui/separator"
 import { homePagePadding } from "@/app/(HOME)/page"
 import GlowingStroke from "./GlowingStroke"
+import Link from "next/link"
 
 const LandingPage = () => {
   return (
@@ -29,13 +30,17 @@ const LandingPage = () => {
         </p>
 
         <div className="flex shrink-0 gap-3">
-          <Button size="lg" className="h-12 px-6">
-            Start Learning
-          </Button>
+          <Link href={"/pricing"}>
+            <Button size="lg" className="h-12 px-6">
+              Start Learning
+            </Button>
+          </Link>
 
-          <Button size="lg" variant="outline" className="h-12 px-6">
-            Explore Roadmaps
-          </Button>
+          <Link href={"/roadmaps"}>
+            <Button size="lg" variant="outline" className="h-12 px-6">
+              Explore Roadmaps
+            </Button>
+          </Link>
         </div>
       </div>
 

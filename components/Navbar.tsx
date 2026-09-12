@@ -6,7 +6,7 @@ import { Card } from "./ui/card"
 const Navbar = () => {
   const navItems = [
     { href: "/", label: "Home" },
-    { href: "/about", label: "About" },
+    { href: "/pricing", label: "Pricing" },
     { href: "/contact", label: "Contact" },
     { href: "/roadmaps", label: "Roadmaps" },
   ]
@@ -32,13 +32,13 @@ const Navbar = () => {
         </nav>
 
         <div className="flex gap-2">
-          <Link href={"/pricing"}>
-            <Button size={"lg"}>Get Started</Button>
-          </Link>
-          <Link href={"/panel"}>
+          <Link href={"/login"}>
             <Button size={"lg"} variant={"ghost"}>
               Sign In
             </Button>
+          </Link>
+          <Link href={"/login?signup=true"}>
+            <Button size={"lg"}>Get Started</Button>
           </Link>
         </div>
       </Card>
