@@ -1,48 +1,15 @@
-import Link from "next/link"
 import { ArrowUpRight, Clock3 } from "lucide-react"
+import Link from "next/link"
 
-import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-
-const roadmaps = [
-  {
-    number: "01",
-    slug: "web-design",
-    title: "Web Design",
-    description:
-      "Learn how to turn ideas into beautiful, intuitive, and purposeful digital experiences.",
-    duration: "3 months",
-    courses: 3,
-    skills: ["Design Principles", "Figma", "UI Design"],
-  },
-  {
-    number: "02",
-    slug: "front-end",
-    title: "Front-End",
-    description:
-      "Master the technologies behind modern interfaces and learn how to build real-world web applications.",
-    duration: "6 months",
-    courses: 6,
-    skills: ["HTML", "CSS", "JavaScript", "React", "TypeScript", "Next.js"],
-  },
-  {
-    number: "03",
-    slug: "back-end",
-    title: "Back-End",
-    description:
-      "Learn how applications work behind the scenes and build reliable APIs, databases, and server-side systems.",
-    duration: "5 months",
-    courses: 5,
-    skills: ["JavaScript", "Node.js", "MySQL", "Git", "Docker"],
-  },
-]
+import { roadmapsCategory } from "@/lib/roadmaps"
 
 export default function RoadmapsPage() {
   return (
     <main>
       {/* Roadmaps */}
       <section>
-        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
+        <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12 flex items-end justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
@@ -60,7 +27,7 @@ export default function RoadmapsPage() {
           </div>
 
           <div className="grid gap-5 lg:grid-cols-3">
-            {roadmaps.map((roadmap) => (
+            {roadmapsCategory.map((roadmap) => (
               <Link
                 key={roadmap.slug}
                 href={`/roadmaps/${roadmap.slug}`}
@@ -110,30 +77,6 @@ export default function RoadmapsPage() {
                 </Card>
               </Link>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <section className="border-t">
-        <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-          <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
-            <div>
-              <Badge variant="outline" className="rounded-full px-3 py-1.5">
-                Start building
-              </Badge>
-
-              <h2 className="mt-5 max-w-2xl text-4xl font-semibold tracking-[-0.04em] md:text-5xl">
-                Your next skill is
-                <br />
-                <span className="text-muted-foreground">one course away.</span>
-              </h2>
-            </div>
-
-            <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-              Pick a roadmap and let Parallane guide you from the fundamentals
-              to building real-world applications.
-            </p>
           </div>
         </div>
       </section>

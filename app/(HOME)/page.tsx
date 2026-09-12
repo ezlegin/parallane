@@ -10,7 +10,7 @@ export const homePagePadding = "px-50"
 
 const page = () => {
   return (
-    <div className="space-y-52 py-28">
+    <div className="space-y-52">
       <LandingPage />
 
       <SocialProofs />
