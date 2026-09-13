@@ -49,7 +49,7 @@ export default function PaymentsPage() {
             {payments.map((payment) => (
               <div
                 key={payment.invoice}
-                className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-4">
                   <div className="flex size-10 items-center justify-center rounded-full border">
@@ -66,7 +66,7 @@ export default function PaymentsPage() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <Badge variant="outline">{payment.status}</Badge>
+                  <Badge variant="success">{payment.status}</Badge>
 
                   <span className="font-medium">{payment.amount}</span>
                 </div>

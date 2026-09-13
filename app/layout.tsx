@@ -37,3 +37,14 @@ export default function RootLayout({
     </html>
   )
 }
+
+export const metadata = {
+  title: {
+    default: "Parallane",
+    template: "%s | Parallane",
+  },
+  description: "Parallane",
+  icons: {
+    icon: "/logos/favicon.svg",
+  },
+}

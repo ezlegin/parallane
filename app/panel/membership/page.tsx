@@ -43,11 +43,11 @@ export default function MembershipPage() {
               </div>
             </div>
 
-            <Badge>Active</Badge>
+            <Badge variant={"success"}>Active</Badge>
           </div>
         </CardHeader>
 
-        <CardContent className="p-6">
+        <CardContent>
           <div className="grid gap-8 lg:grid-cols-2">
             <div>
               <p className="text-sm text-muted-foreground">Current plan</p>

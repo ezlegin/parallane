@@ -51,7 +51,7 @@ export default function CoursesPage() {
       <div className="grid gap-4 md:grid-cols-2">
         {courses.map((course) => (
           <Card key={course.title}>
-            <CardContent className="p-6">
+            <CardContent className="p-">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex size-11 items-center justify-center rounded-lg border bg-muted">
                   <BookOpen className="size-5" />
@@ -60,7 +60,7 @@ export default function CoursesPage() {
                 <Badge variant="outline">{course.status}</Badge>
               </div>
 
-              <h2 className="mt-5 font-semibold">{course.title}</h2>
+              <h2 className="mt-5 text-lg font-semibold">{course.title}</h2>
 
               <p className="mt-1 text-sm text-muted-foreground">
                 {course.description}

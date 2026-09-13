@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 
 const stats = [
   {
@@ -71,22 +72,22 @@ export default function DashboardPage() {
 
           return (
             <Card key={stat.label}>
-              <CardContent className="p-5">
+              <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
 
                   <Icon className="size-4 text-muted-foreground" />
                 </div>
 
-                <p className="mt-3 text-2xl font-semibold">{stat.value}</p>
+                <p className="text-2xl font-semibold">{stat.value}</p>
               </CardContent>
             </Card>
           )
         })}
       </section>
 
-      <section>
-        <div className="mb-4 flex items-center justify-between">
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
           <div>
             <h2 className="font-semibold">Continue learning</h2>
 
@@ -106,7 +107,7 @@ export default function DashboardPage() {
         <div className="space-y-4">
           {courses.map((course) => (
             <Card key={course.title}>
-              <CardContent className="p-5">
+              <CardContent>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                   <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border bg-muted">
                     <BookOpen className="size-5" />
@@ -144,6 +145,8 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      <Separator />
+
       <section className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -153,7 +156,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <Badge>Active</Badge>
+                <Badge variant={"success"}>Active</Badge>
 
                 <p className="mt-3 text-2xl font-semibold">
                   $19
