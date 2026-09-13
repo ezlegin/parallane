@@ -158,3 +158,66 @@ export const courses: Record<string, Course> = {
     ],
   },
 }
+
+export const coursesx = [
+  {
+    slug: "react",
+    title: "React",
+    summary: "Build modern interactive web applications.",
+
+    curriculum: [
+      {
+        id: "season-1",
+        title: "React Fundamentals",
+        duration: "2h 40m",
+
+        lessons: [
+          {
+            id: "react-introduction",
+            title: "Introduction to React",
+            duration: "12:34",
+            type: "video",
+            video: "/courses/react/01-introduction.mp4",
+          },
+          {
+            id: "react-components",
+            title: "Understanding Components",
+            duration: "18:21",
+            type: "video",
+            video: "/courses/react/02-components.mp4",
+          },
+          {
+            id: "react-props",
+            title: "Props and Data",
+            duration: "21:08",
+            type: "video",
+            video: "/courses/react/03-props.mp4",
+          },
+        ],
+      },
+
+      {
+        id: "season-2",
+        title: "State and Events",
+        duration: "3h 15m",
+
+        lessons: [
+          {
+            id: "react-state",
+            title: "Understanding State",
+            duration: "24:10",
+            type: "video",
+            video: "/courses/react/04-state.mp4",
+          },
+          {
+            id: "react-events",
+            title: "Handling Events",
+            duration: "17:42",
+            type: "video",
+            video: "/courses/react/05-events.mp4",
+          },
+        ],
+      },
+    ],
+  },
+]
