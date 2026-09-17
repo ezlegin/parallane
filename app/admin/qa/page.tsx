@@ -95,13 +95,15 @@ function QAConversationRow({
         </Link>
 
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="size-4" />
+          <DropdownMenuTrigger
+            render={
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="size-4" />
 
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
+                <span className="sr-only">Open menu</span>
+              </Button>
+            }
+          />
 
           <DropdownMenuContent align="end">
             <DropdownMenuItem>

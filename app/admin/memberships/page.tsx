@@ -159,15 +159,19 @@ function MembershipCard({
       <CardFooter>
         <Dialog>
           <DialogTrigger
-            className={"flex items-center rounded-full border bg-card p-2 px-3"}
-          >
-            <BookOpen className="mr-2 size-4" />
-            {membership.courses.length === 0
-              ? "No courses enrolled"
-              : `Enrolled in ${membership.courses.length} ${
-                  membership.courses.length === 1 ? "course" : "courses"
-                }`}
-          </DialogTrigger>
+            render={
+              <Button variant="outline">
+                <BookOpen />
+                <span>
+                  {membership.courses.length === 0
+                    ? "No courses enrolled"
+                    : `Enrolled in ${membership.courses.length} ${
+                        membership.courses.length === 1 ? "course" : "courses"
+                      }`}
+                </span>
+              </Button>
+            }
+          />
 
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>

@@ -74,12 +74,14 @@ function EnrollmentCard({
           </div>
 
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <MoreHorizontal className="size-4" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="ghost" size="icon" className="shrink-0">
+                  <MoreHorizontal />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              }
+            />
 
             <DropdownMenuContent align="end">
               <Link href={`/admin/enrollments/${enrollment.id}`}>

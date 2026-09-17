@@ -141,12 +141,14 @@ export default function StudentsPage() {
         </div>
 
         <Popover>
-          <PopoverTrigger>
-            <Button variant="outline" className="justify-between sm:w-48">
-              {currentFilter?.label}
-              <ChevronDown className="size-4 text-muted-foreground" />
-            </Button>
-          </PopoverTrigger>
+          <PopoverTrigger
+            render={
+              <Button variant="outline" className="justify-between sm:w-48">
+                {currentFilter?.label}
+                <ChevronDown className="size-4 text-muted-foreground" />
+              </Button>
+            }
+          />
 
           <PopoverContent align="end" className="w-48 p-1">
             {membershipFilters.map((filter) => (
@@ -253,12 +255,14 @@ export default function StudentsPage() {
 
                 {/* Actions */}
                 <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <Button variant="ghost" size="icon" className="shrink-0">
-                      <MoreHorizontal className="size-4" />
-                      <span className="sr-only">Student actions</span>
-                    </Button>
-                  </DropdownMenuTrigger>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button variant="ghost" size="icon" className="shrink-0">
+                        <MoreHorizontal className="size-4" />
+                        <span className="sr-only">Student actions</span>
+                      </Button>
+                    }
+                  />
 
                   <DropdownMenuContent align="end">
                     <Link href={`/admin/students/${student.id}`}>

@@ -73,12 +73,14 @@ export default function AdminCoursesPage() {
                   </div>
 
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <div className="-mt-2 -mr-2">
-                        <MoreHorizontal />
-                        <span className="sr-only">Course actions</span>
-                      </div>
-                    </DropdownMenuTrigger>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button variant={"ghost"}>
+                          <MoreHorizontal />
+                          <span className="sr-only">Course actions</span>
+                        </Button>
+                      }
+                    />
 
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem>

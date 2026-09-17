@@ -224,7 +224,7 @@ const navigation = [
 const accountNavigation = [
   {
     title: "Profile",
-    href: "/panel/profile",
+    href: "/admin/profile",
     icon: UserRound,
   },
 ]

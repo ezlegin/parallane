@@ -12,6 +12,7 @@ import Link from "next/link"
 import { adminPayments } from "@/lib/admin-payments"
 
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import {
   DropdownMenu,
@@ -73,13 +74,14 @@ export default function AdminPaymentsPage() {
                 </div>
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <MoreHorizontal
-                      size={20}
-                      className="text-muted-foreground"
-                    />
-                    <span className="sr-only">Payment actions</span>
-                  </DropdownMenuTrigger>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button variant="ghost">
+                        <MoreHorizontal />
+                        <span className="sr-only">Payment actions</span>
+                      </Button>
+                    }
+                  />
 
                   <DropdownMenuContent align="end">
                     <Link href={`/admin/payments/${payment.id}`}>

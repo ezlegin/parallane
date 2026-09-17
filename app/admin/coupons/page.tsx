@@ -108,13 +108,14 @@ export default function CouponsPage() {
 
                 <TableCell>
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="size-4" />
-
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      }
+                    />
 
                     <DropdownMenuContent align="end">
                       <Link href={`/admin/coupons/${coupon.id}`}>
