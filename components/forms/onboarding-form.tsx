@@ -1,7 +1,7 @@
 "use client"
 
 import { countries } from "countries-list"
-import { useMemo, useState, useTransition } from "react"
+import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 
 import { ArrowRight, Check, ChevronsUpDown, Globe2 } from "lucide-react"
 
@@ -46,9 +46,10 @@ const formattedCountries = Object.keys(countries)
 export function CountryOnboardingForm({
   firstName,
 }: CountryOnboardingFormProps) {
-  const [selectedCountry, setSelectedCountry] = useState("")
+  const [selectedCountry, setSelectedCountry] = useState("US")
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition() //todo: use transition.
+  const [search, setSearch] = useState("")
 
   const selectedCountryName = useMemo(
     () =>
@@ -61,6 +62,15 @@ export function CountryOnboardingForm({
     console.log(selectedCountry)
     toast.add({ title: "country saved." })
   }
+
+  const listRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    listRef.current?.scrollTo({
+      top: 0,
+      behavior: "instant",
+    })
+  }, [search])
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
@@ -123,9 +133,12 @@ export function CountryOnboardingForm({
                   className="w-(--radix-popover-trigger-width) min-w-70 p-0"
                 >
                   <Command>
-                    <CommandInput placeholder="Search countries..." />
+                    <CommandInput
+                      placeholder="Search countries..."
+                      onValueChange={setSearch}
+                    />
 
-                    <CommandList>
+                    <CommandList ref={listRef}>
                       <CommandEmpty>No country found.</CommandEmpty>
 
                       <CommandGroup heading="Countries">

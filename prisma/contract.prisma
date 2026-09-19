@@ -1,0 +1,379 @@
+// use prisma-8
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum CourseCategory {
+  WEB_DESIGN
+  FRONTEND
+  BACKEND
+}
+
+enum LessonType {
+  VIDEO
+  DOCUMENT
+}
+
+enum MembershipPeriod {
+  MONTHLY
+  ANNUAL
+}
+
+enum MembershipStatus {
+  ACTIVE
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum DiscountType {
+  FIXED
+  PERCENTAGE
+}
+
+enum CouponStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum TutorMessageRole {
+  USER
+  TUTOR
+}
+
+model Admin {
+  id       String @id @default(uuid())
+  fullName String
+  email    String @unique
+  password String
+}
+
+model User {
+  id               String               @id @default(uuid())
+  email            String               @unique
+  password         String
+
+  fullName         String
+
+  createdAt        DateTime             @default(now())
+  updatedAt        temporal.updatedAt()
+
+  membership       Membership?
+  payments         Payment[]
+  enrollments      Enrollment[]
+
+  courseProgresses CourseProgress[]
+  lessonProgresses LessonProgress[]
+
+  conversations    TutorConversation[]
+  certificates     Certificate[]
+
+  couponUsages     CouponUsage[]
+
+  @@index([createdAt])
+}
+
+model Course {
+  id               String               @id @default(uuid())
+
+  title            String
+  slug             String               @unique
+
+  summary          String
+  description      String
+
+  category         CourseCategory
+  status           CourseStatus         @default(DRAFT)
+
+  audience         String[]
+
+  teaserUrl        String?
+  duration         Int                  @default(0)
+
+  createdAt        DateTime             @default(now())
+  updatedAt        temporal.updatedAt()
+
+  seasons          Season[]
+  enrollments      Enrollment[]
+
+  courseProgresses CourseProgress[]
+  certificates     Certificate[]
+
+  @@index([category])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Season {
+  id       String   @id @default(uuid())
+
+  title    String
+  order    Int
+
+  courseId String
+  course   Course   @relation(fields:[courseId], references:[id], onDelete: Cascade)
+
+  lessons  Lesson[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+}
+
+model Lesson {
+  id       String           @id @default(uuid())
+
+  title    String
+  order    Int
+
+  type     LessonType
+  url      String
+
+  isFree   Boolean          @default(false)
+  duration Int              @default(0)
+
+  seasonId String
+  season   Season           @relation(fields:[seasonId], references:[id], onDelete: Cascade)
+
+  progress LessonProgress[]
+
+  @@unique([seasonId, order])
+  @@index([seasonId])
+}
+
+model Membership {
+  id          String               @id @default(uuid())
+
+  userId      String               @unique
+  user        User                 @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  status      MembershipStatus     @default(ACTIVE)
+  period      MembershipPeriod
+
+  price       Decimal
+
+  startsAt    DateTime             @default(now())
+  expiresAt   DateTime
+
+  createdAt   DateTime             @default(now())
+  updatedAt   temporal.updatedAt()
+
+  payments    Payment[]
+  enrollments Enrollment[]
+
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model Payment {
+  id             String               @id @default(uuid())
+
+  userId         String
+  user           User                 @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  membershipId   String?
+  membership     Membership?          @relation(fields:[membershipId], references:[id], onDelete: SetNull)
+
+  status         PaymentStatus        @default(PENDING)
+
+  totalAmount    Decimal
+  discountAmount Decimal
+  paidAmount     Decimal
+
+  discountType   DiscountType?
+  discountCode   String?
+
+  paidAt         DateTime?
+
+  createdAt      DateTime             @default(now())
+  updatedAt      temporal.updatedAt()
+
+  couponUsage    CouponUsage?
+
+  @@index([userId])
+  @@index([membershipId])
+  @@index([status])
+  @@index([paidAt])
+  @@index([createdAt])
+}
+
+model Coupon {
+  id             String               @id @default(uuid())
+
+  code           String               @unique
+
+  discountType   DiscountType
+  discountAmount Decimal
+
+  status         CouponStatus         @default(ACTIVE)
+
+  expiresAt      DateTime?
+
+  usageLimit     Int?
+  usageCount     Int                  @default(0)
+
+  createdAt      DateTime             @default(now())
+  updatedAt      temporal.updatedAt()
+
+  usages         CouponUsage[]
+
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model CouponUsage {
+  id             String   @id @default(uuid())
+
+  couponId       String
+  coupon         Coupon   @relation(fields:[couponId], references:[id], onDelete: Cascade)
+
+  userId         String
+  user           User     @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  paymentId      String   @unique
+  payment        Payment  @relation(fields:[paymentId], references:[id], onDelete: Cascade)
+
+  discountAmount Decimal
+
+  createdAt      DateTime @default(now())
+
+  @@unique([couponId, userId])
+  @@index([couponId])
+  @@index([userId])
+}
+
+model Enrollment {
+  id           String          @id @default(uuid())
+
+  userId       String
+  user         User            @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  membershipId String
+  membership   Membership      @relation(fields:[membershipId], references:[id], onDelete: Cascade)
+
+  courseId     String
+  course       Course          @relation(fields:[courseId], references:[id], onDelete: Cascade)
+
+  enrolledAt   DateTime        @default(now())
+
+  completedAt  DateTime?
+
+  progress     CourseProgress?
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+model CourseProgress {
+  id               String               @id @default(uuid())
+
+  enrollmentId     String               @unique
+  enrollment       Enrollment           @relation(fields:[enrollmentId], references:[id], onDelete: Cascade)
+
+  userId           String
+  user             User                 @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  courseId         String
+  course           Course               @relation(fields:[courseId], references:[id], onDelete: Cascade)
+
+  completedLessons Int                  @default(0)
+  totalLessons     Int                  @default(0)
+
+  percentage       Int                  @default(0)
+
+  lastLessonId     String?
+  lastWatchedAt    DateTime?
+
+  completedAt      DateTime?
+
+  createdAt        DateTime             @default(now())
+  updatedAt        temporal.updatedAt()
+
+  @@index([userId])
+  @@index([courseId])
+}
+
+model LessonProgress {
+  id             String               @id @default(uuid())
+
+  userId         String
+  user           User                 @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  lessonId       String
+  lesson         Lesson               @relation(fields:[lessonId], references:[id], onDelete: Cascade)
+
+  watchedSeconds Int                  @default(0)
+
+  completed      Boolean              @default(false)
+  completedAt    DateTime?
+  lastWatchedAt  DateTime?
+
+  createdAt      DateTime             @default(now())
+  updatedAt      temporal.updatedAt()
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+}
+
+model TutorConversation {
+  id        String               @id @default(uuid())
+
+  userId    String
+  user      User                 @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  courseId  String
+  course    Course               @relation(fields:[courseId], references:[id], onDelete: Cascade)
+
+  lessonId  String?
+  lesson    Lesson?              @relation(fields:[lessonId], references:[id], onDelete: SetNull)
+
+  createdAt DateTime             @default(now())
+  updatedAt temporal.updatedAt()
+
+  messages  TutorMessage[]
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([lessonId])
+}
+
+model TutorMessage {
+  id             String            @id @default(uuid())
+
+  conversationId String
+  conversation   TutorConversation @relation(fields:[conversationId], references:[id], onDelete: Cascade)
+
+  role           TutorMessageRole
+
+  content        String
+
+  createdAt      DateTime          @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+model Certificate {
+  id                String   @id @default(uuid())
+
+  certificateNumber String   @unique
+  url               String
+
+  userId            String
+  user              User     @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  courseId          String
+  course            Course   @relation(fields:[courseId], references:[id], onDelete: Cascade)
+
+  issuedAt          DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}

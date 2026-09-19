@@ -8,7 +8,7 @@ import StopWondering from "@/components/StopWondering"
 
 export const homePagePadding = "px-50"
 
-const page = () => {
+const page = async () => {
   return (
     <div className="space-y-52">
       <LandingPage />
