@@ -7,6 +7,7 @@ import { Button } from "./ui/button"
 import { Card } from "./ui/card"
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group"
 import { useState } from "react"
+import Link from "next/link"
 
 const MembershipCard = () => {
   const [period, setPeriod] = useState<"monthly" | "annual">("monthly")
@@ -41,9 +42,11 @@ const MembershipCard = () => {
                 pace.
               </p>
 
-              <Button size="lg" className="mt-8 h-12">
-                Join Parallane →
-              </Button>
+              <Link href={`/checkout?plan=${period}`} className="w-full">
+                <Button size="lg" className="w-full">
+                  Join Parallane →
+                </Button>
+              </Link>
             </Card>
 
             {/* Right */}
@@ -72,7 +75,7 @@ const MembershipCard = () => {
                   >
                     Annual{" "}
                     <span className="text-xs text-muted-foreground">
-                      (-%34)
+                      (-%35)
                     </span>
                   </ToggleGroupItem>
                 </ToggleGroup>
@@ -88,10 +91,16 @@ const MembershipCard = () => {
               </div>
 
               {isAnnual ? (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Billed annually at{" "}
-                  <strong className="text-foreground">$228/year</strong>.
-                </p>
+                <div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Billed annually at{" "}
+                    <strong className="text-lg text-foreground">
+                      $228/year
+                    </strong>
+                    .
+                  </p>
+                  <Badge variant={"success"}>Save $120.</Badge>
+                </div>
               ) : (
                 <p className="mt-2 text-sm text-muted-foreground">
                   Billed monthly at{" "}
