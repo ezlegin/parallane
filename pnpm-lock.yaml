@@ -23,6 +23,9 @@ importers:
       cn:
         specifier: ^0.2.6
         version: 0.2.6
+      countries-list:
+        specifier: ^3.4.1
+        version: 3.4.1
       lucide-react:
         specifier: ^1.42.0
         version: 1.42.0(react@19.2.4)
@@ -1406,6 +1409,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  countries-list@3.4.1:
+    resolution: {integrity: sha512-sKLGAZD5EAdzQwQ19vOp/9u33MTjmZ0CkdXPYtp/An6cyIlJ/E8TwGf2FcPe1AnzHO+h7nbTfoHyXIi58Hpa+Q==}
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -4528,6 +4534,8 @@ snapshots:
       parse-json: 5.2.0
     optionalDependencies:
       typescript: 5.9.3
+
+  countries-list@3.4.1: {}
 
   cross-spawn@7.0.6:
     dependencies:
