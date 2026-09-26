@@ -1,14 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Eye, EyeOff, Loader2, Save } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import type { AdminStudent } from "@/lib/admin-students"
-
+import { createStudent, updateStudent } from "@/actions/student"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -27,75 +19,50 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/toast"
-
-const studentSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters.")
-    .max(100, "Name is too long."),
-
-  email: z.string().email("Please enter a valid email address."),
-
-  password: z
-    .string()
-    .refine(
-      (value) => value === "" || value.length >= 8,
-      "Password must be at least 8 characters."
-    ),
-})
-
-type StudentFormValues = z.infer<typeof studentSchema>
+import { StudentFormTypes, studentFormSchema } from "@/lib/formSchema"
+import { Models } from "@/prisma/contract"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Shape } from "@prisma/orm-postgres/components"
+import { Eye, EyeOff, Loader2, Save } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
 
 type StudentFormProps = {
-  student?: AdminStudent
+  student?: Shape<Models.public_User>
 }
 
 export function StudentForm({ student }: StudentFormProps) {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
 
-  const isEditing = Boolean(student)
+  const isEditing = !!student
 
-  const form = useForm<StudentFormValues>({
-    resolver: zodResolver(studentSchema),
+  const form = useForm<StudentFormTypes>({
+    resolver: zodResolver(studentFormSchema),
     defaultValues: {
-      name: student?.name ?? "",
+      fullName: student?.fullName ?? "",
       email: student?.email ?? "",
       password: "",
     },
   })
 
-  async function onSubmit(values: StudentFormValues) {
-    try {
-      // TODO:
-      // Connect this to your API/server action.
-      //
-      // Example:
-      // await updateStudent(student.id, values)
+  async function onSubmit(data: StudentFormTypes) {
+    const res = isEditing
+      ? await updateStudent(student?.id, data)
+      : await createStudent(data)
 
-      console.log({
-        ...values,
-        password: values.password || undefined,
-      })
+    if (res.error) {
+      toast.add({ title: res.error })
+      return
+    }
 
-      toast.add({
-        title: isEditing
-          ? "Student updated successfully."
-          : "Student created successfully.",
-      })
+    if (res.success) {
+      toast.add({ title: res.success })
+    }
 
-      if (isEditing && student) {
-        router.push(`/admin/students/${student.id}`)
-        router.refresh()
-      } else {
-        router.push("/admin/students")
-        router.refresh()
-      }
-    } catch {
-      // todo
-      //   toast.error(
-      //     isEditing ? "Failed to update student." : "Failed to create student."
-      //   )
+    if (!isEditing) {
+      router.push("/admin/students")
     }
   }
 
@@ -115,19 +82,21 @@ export function StudentForm({ student }: StudentFormProps) {
         <CardContent>
           <FieldGroup>
             {/* Name */}
-            <Field data-invalid={!!form.formState.errors.name}>
+            <Field data-invalid={!!form.formState.errors.fullName}>
               <FieldLabel htmlFor="name">Full name</FieldLabel>
 
               <Input
                 id="name"
                 placeholder="Alex Morgan"
                 autoComplete="name"
-                aria-invalid={!!form.formState.errors.name}
-                {...form.register("name")}
+                aria-invalid={!!form.formState.errors.fullName}
+                {...form.register("fullName")}
               />
 
-              {form.formState.errors.name && (
-                <FieldError>{form.formState.errors.name.message}</FieldError>
+              {form.formState.errors.fullName && (
+                <FieldError>
+                  {form.formState.errors.fullName.message}
+                </FieldError>
               )}
             </Field>
 

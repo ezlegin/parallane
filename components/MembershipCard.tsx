@@ -92,14 +92,15 @@ const MembershipCard = () => {
 
               {isAnnual ? (
                 <div>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="mt-2 space-x-2 text-sm text-muted-foreground">
                     Billed annually at{" "}
                     <strong className="text-lg text-foreground">
-                      $228/year
+                      $228/year.
                     </strong>
-                    .
+                    <Badge className="font-semibold" variant={"success"}>
+                      Save $120.
+                    </Badge>
                   </p>
-                  <Badge variant={"success"}>Save $120.</Badge>
                 </div>
               ) : (
                 <p className="mt-2 text-sm text-muted-foreground">
