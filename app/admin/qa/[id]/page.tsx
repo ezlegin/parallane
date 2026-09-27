@@ -2,12 +2,14 @@ import { ArrowLeft, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { getAdminQAConversation } from "@/lib/admin-qa"
-
+import ConversationMessageForm from "@/components/forms/ConversationMessageForm"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Card, CardFooter, CardHeader } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { getStatusVariant } from "@/lib/getConversationStatusVariant"
+import { prisma } from "@/prisma/prisma"
+import MessagesList from "./MessagesList"
 
 export default async function QAChatPage({
   params,
@@ -16,7 +18,15 @@ export default async function QAChatPage({
 }) {
   const { id } = await params
 
-  const conversation = getAdminQAConversation(id)
+  const conversation = await prisma.tutorConversation.findFirst({
+    where: { id },
+    include: {
+      user: true,
+      messages: true,
+      lesson: true,
+      course: { select: { title: true } },
+    },
+  })
 
   if (!conversation) {
     notFound()
@@ -36,19 +46,14 @@ export default async function QAChatPage({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
             <h1 className="truncate text-xl font-semibold">
-              {conversation.user.name}
+              {conversation.user.fullName}
             </h1>
 
             <Badge
-              variant={
-                conversation.status === "open"
-                  ? "default"
-                  : conversation.status === "waiting"
-                    ? "secondary"
-                    : "outline"
-              }
+              variant={getStatusVariant(conversation.status)}
+              className="capitalize"
             >
-              {formatStatus(conversation.status)}
+              {conversation.status}
             </Badge>
           </div>
 
@@ -76,75 +81,20 @@ export default async function QAChatPage({
           </div>
         </CardHeader>
 
-        <CardContent className="min-h-125 space-y-6 p-6">
-          {conversation.messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.sender === "admin" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-[80%] space-y-1 ${
-                  message.sender === "admin" ? "items-end" : "items-start"
-                }`}
-              >
-                <div
-                  className={`rounded-2xl px-4 py-3 text-sm ${
-                    message.sender === "admin"
-                      ? "rounded-br-md bg-foreground text-background"
-                      : "rounded-bl-none border bg-muted/30"
-                  }`}
-                >
-                  {message.message}
-                </div>
-
-                <p className="px-1 text-[11px] text-muted-foreground">
-                  {message.sender === "admin" ? "You" : conversation.user.name}{" "}
-                  · {message.createdAt}
-                </p>
-              </div>
-            </div>
-          ))}
-        </CardContent>
+        <MessagesList
+          messages={conversation.messages}
+          userFullName={conversation.user.fullName}
+        />
 
         <Separator />
 
         <CardFooter className="block p-4">
-          <AdminMessageForm />
+          <ConversationMessageForm
+            conversationId={conversation.id}
+            studentName={conversation.user.fullName}
+          />
         </CardFooter>
       </Card>
     </div>
   )
-}
-
-function AdminMessageForm() {
-  return (
-    <form className="space-y-3">
-      <textarea
-        placeholder="Write a message..."
-        rows={3}
-        className="flex min-h-20 w-full resize-none rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
-      />
-
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-xs text-muted-foreground">Replying as admin</p>
-
-        <Button type="submit">Send message</Button>
-      </div>
-    </form>
-  )
-}
-
-function formatStatus(status: "open" | "waiting" | "closed") {
-  switch (status) {
-    case "open":
-      return "Open"
-
-    case "waiting":
-      return "Waiting"
-
-    case "closed":
-      return "Closed"
-  }
 }
