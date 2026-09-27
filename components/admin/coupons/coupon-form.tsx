@@ -1,232 +1,238 @@
 "use client"
 
-import { useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Controller, useForm } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import {
   Field,
-  FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { CouponFormValues, couponSchema } from "@/lib/formSchema"
+import { Coupon } from "@/prisma/generated/prisma/client"
+import { cn } from "cn"
+import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+import { createCoupon, updateCoupon } from "@/actions/coupon"
+import { handleRes } from "@/lib/handleRes"
+import { useRouter } from "next/navigation"
 
-const couponSchema = z.object({
-  code: z
-    .string()
-    .min(1, "Coupon code is required")
-    .max(50, "Coupon code is too long")
-    .transform((value) => value.trim().toUpperCase()),
-
-  type: z.enum(["fixed", "percentage"]),
-
-  amount: z.number().positive("Discount must be greater than 0"),
-
-  expiresAt: z.string().min(1, "Expiration date is required"),
-
-  usageLimit: z
-    .number()
-    .int("Usage limit must be a whole number")
-    .positive("Usage limit must be greater than 0"),
-
-  summary: z
-    .string()
-    .min(1, "Summary is required")
-    .max(200, "Summary is too long"),
-})
-
-export type CouponFormValues = z.infer<typeof couponSchema>
-
-type CouponFormProps = {
-  defaultValues: CouponFormValues
-  onSubmit?: (values: CouponFormValues) => void
-}
-
-export function CouponForm({ defaultValues, onSubmit }: CouponFormProps) {
+export function CouponForm({ coupon }: { coupon?: Coupon }) {
+  const router = useRouter()
   const form = useForm<CouponFormValues>({
     resolver: zodResolver(couponSchema),
-    defaultValues,
+    defaultValues: {
+      amount: coupon?.discountAmount.toString() ?? "0",
+      code: coupon?.code ?? "",
+      expiresAt: coupon?.expiresAt ?? new Date(),
+      summary: coupon?.summary ?? "",
+      type: coupon?.discountType ?? "fixed",
+      usageLimit: coupon?.usageLimit?.toString() ?? "0",
+    },
   })
 
   const couponType = form.watch("type")
 
+  const onSubmit = async (data: CouponFormValues) => {
+    const res = coupon
+      ? await updateCoupon(coupon.id, data)
+      : await createCoupon(data)
+    handleRes(res, {
+      onSuccess: () => !coupon && router.push("/admin/coupons"),
+    })
+  }
+
   return (
-    <form
-      onSubmit={form.handleSubmit((values) => {
-        onSubmit?.(values)
-      })}
-    >
+    <form onSubmit={form.handleSubmit(onSubmit)}>
       <Card>
         <CardContent className="pt-6">
           <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="code">Coupon code</FieldLabel>
-
-              <Input
-                id="code"
-                placeholder="YOUTUBE10"
-                className="font-mono uppercase"
-                {...form.register("code")}
-              />
-
-              <FieldDescription>
-                Users will enter this code when purchasing a membership.
-              </FieldDescription>
-
-              {form.formState.errors.code && (
-                <FieldDescription className="text-destructive">
-                  {form.formState.errors.code.message}
-                </FieldDescription>
+            <Controller
+              name="code"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Code</FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="YOUTUBE10"
+                    className="font-mono"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
-            </Field>
+            />
 
-            <Field>
-              <FieldLabel>Discount type</FieldLabel>
+            <Controller
+              name="type"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Discount type</FieldLabel>
 
-              <RadioGroup
-                value={couponType}
-                onValueChange={(value) => {
-                  form.setValue("type", value as CouponFormValues["type"], {
-                    shouldValidate: true,
-                  })
-                }}
-                className="grid gap-3 md:grid-cols-2"
-              >
-                <label
-                  htmlFor="percentage"
-                  className="flex cursor-pointer items-center gap-3 rounded-lg border p-4"
-                >
-                  <RadioGroupItem value="percentage" id="percentage" />
+                  <RadioGroup
+                    value={couponType}
+                    onValueChange={field.onChange}
+                    className="flex gap-3"
+                  >
+                    {["percentage", "fixed"].map((item) => (
+                      <label
+                        key={item}
+                        htmlFor={item}
+                        className="flex cursor-pointer items-center gap-3 rounded-lg border p-2"
+                      >
+                        <RadioGroupItem value={item} id={item} />
+                        <p className="text-sm font-medium capitalize">{item}</p>
+                      </label>
+                    ))}
+                  </RadioGroup>
 
-                  <div>
-                    <p className="text-sm font-medium">Percentage</p>
-
-                    <p className="text-xs text-muted-foreground">
-                      Example: 20% off.
-                    </p>
-                  </div>
-                </label>
-
-                <label
-                  htmlFor="fixed"
-                  className="flex cursor-pointer items-center gap-3 rounded-lg border p-4"
-                >
-                  <RadioGroupItem value="fixed" id="fixed" />
-
-                  <div>
-                    <p className="text-sm font-medium">Fixed amount</p>
-
-                    <p className="text-xs text-muted-foreground">
-                      Example: $5 off.
-                    </p>
-                  </div>
-                </label>
-              </RadioGroup>
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="amount">
-                {couponType === "percentage" ? "Percentage" : "Discount amount"}
-              </FieldLabel>
-
-              <div className="relative">
-                <Input
-                  id="amount"
-                  type="number"
-                  min="0"
-                  step={couponType === "percentage" ? "1" : "0.01"}
-                  placeholder={couponType === "percentage" ? "10" : "5"}
-                  className={couponType === "percentage" ? "pr-8" : "pl-8"}
-                  {...form.register("amount", {
-                    valueAsNumber: true,
-                  })}
-                />
-
-                {couponType === "percentage" ? (
-                  <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
-                    %
-                  </span>
-                ) : (
-                  <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
-                    $
-                  </span>
-                )}
-              </div>
-
-              {form.formState.errors.amount && (
-                <FieldDescription className="text-destructive">
-                  {form.formState.errors.amount.message}
-                </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
-            </Field>
+            />
+
+            <Controller
+              name="amount"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>
+                    {couponType === "percentage"
+                      ? "Percentage"
+                      : "Discount amount"}
+                  </FieldLabel>
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      id="amount"
+                      type="number"
+                      min="0"
+                      step={couponType === "percentage" ? "1" : "0.1"}
+                      placeholder={couponType === "percentage" ? "10" : "5"}
+                      className={couponType === "percentage" ? "pr-8" : "pl-8"}
+                    />
+
+                    {couponType === "percentage" ? (
+                      <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
+                        %
+                      </span>
+                    ) : (
+                      <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
+                        $
+                      </span>
+                    )}
+                  </div>
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
             <div className="grid gap-6 md:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="expiresAt">Expiration date</FieldLabel>
+              <Controller
+                name="expiresAt"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Expiration date</FieldLabel>
 
-                <Input
-                  id="expiresAt"
-                  type="date"
-                  {...form.register("expiresAt")}
-                />
+                    <Popover modal={true}>
+                      <PopoverTrigger
+                        className={"h-12"}
+                        render={
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? (
+                              format(field.value, "PP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        }
+                      />
 
-                {form.formState.errors.expiresAt && (
-                  <FieldDescription className="text-destructive">
-                    {form.formState.errors.expiresAt.message}
-                  </FieldDescription>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          className="pointer-events-auto p-3"
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="usageLimit">Usage limit</FieldLabel>
-
-                <Input
-                  id="usageLimit"
-                  type="number"
-                  min="1"
-                  step="1"
-                  placeholder="100"
-                  {...form.register("usageLimit", {
-                    valueAsNumber: true,
-                  })}
-                />
-
-                <FieldDescription>
-                  Maximum number of times this coupon can be used.
-                </FieldDescription>
-
-                {form.formState.errors.usageLimit && (
-                  <FieldDescription className="text-destructive">
-                    {form.formState.errors.usageLimit.message}
-                  </FieldDescription>
-                )}
-              </Field>
-            </div>
-
-            <Field>
-              <FieldLabel htmlFor="summary">Summary</FieldLabel>
-
-              <Input
-                id="summary"
-                placeholder="10% off membership for YouTube viewers."
-                {...form.register("summary")}
               />
 
-              <FieldDescription>
-                A short internal description to help you identify the purpose of
-                this coupon.
-              </FieldDescription>
+              <Controller
+                name="usageLimit"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Limit</FieldLabel>
+                    <Input
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      placeholder="0"
+                      type="number"
+                      min="1"
+                      step="1"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </div>
 
-              {form.formState.errors.summary && (
-                <FieldDescription className="text-destructive">
-                  {form.formState.errors.summary.message}
-                </FieldDescription>
+            <Controller
+              name="summary"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Summary</FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="10% off membership for YouTube viewers."
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
               )}
-            </Field>
+            />
           </FieldGroup>
         </CardContent>
 

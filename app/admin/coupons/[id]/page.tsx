@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation"
 
-import { getAdminCoupon } from "@/lib/admin-coupons"
-
 import { CouponForm } from "@/components/admin/coupons/coupon-form"
+import { prisma } from "@/prisma/prisma"
 
 export default async function CouponEditPage({
   params,
@@ -11,7 +10,7 @@ export default async function CouponEditPage({
 }) {
   const { id } = await params
 
-  const coupon = getAdminCoupon(id)
+  const coupon = await prisma.coupon.findFirst({ where: { id } })
 
   if (!coupon) {
     notFound()
@@ -27,20 +26,7 @@ export default async function CouponEditPage({
         </p>
       </div>
 
-      <CouponForm
-        defaultValues={{
-          code: coupon.code,
-          type: coupon.type,
-          amount: coupon.amount,
-          expiresAt: toInputDate(coupon.expiresAt),
-          usageLimit: coupon.usageLimit,
-          summary: coupon.summary,
-        }}
-      />
+      <CouponForm coupon={coupon} />
     </div>
   )
-}
-
-function toInputDate(value: string) {
-  return new Date(value).toISOString().split("T")[0]
 }

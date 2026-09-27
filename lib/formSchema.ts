@@ -17,3 +17,21 @@ export const studentFormSchema = z.object({
 })
 
 export type StudentFormTypes = z.infer<typeof studentFormSchema>
+
+export const couponSchema = z.object({
+  code: z
+    .string()
+    .min(1, "Coupon code is required")
+    .max(50, "Coupon code is too long")
+    .transform((value) => value.trim().toUpperCase()),
+  type: z.enum(["fixed", "percentage"]),
+  amount: z.string(),
+  expiresAt: z.date(),
+  usageLimit: z.string(),
+  summary: z
+    .string()
+    .min(1, "Summary is required")
+    .max(200, "Summary is too long"),
+})
+
+export type CouponFormValues = z.infer<typeof couponSchema>
