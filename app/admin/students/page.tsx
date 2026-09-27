@@ -17,6 +17,7 @@ const page = async () => {
       },
       enrollments: { select: { id: true } },
     },
+    orderBy: { createdAt: "desc" },
   })
   const totalStudents = await prisma.user.count()
 

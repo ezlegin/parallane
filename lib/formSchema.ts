@@ -35,3 +35,13 @@ export const couponSchema = z.object({
 })
 
 export type CouponFormValues = z.infer<typeof couponSchema>
+
+export const membershipSchema = z.object({
+  userId: z.string().min(1, "User is required"),
+  paymentId: z.string().optional(),
+  from: z.date(),
+  expiresAt: z.date(),
+  period: z.enum(["monthly", "annual"]),
+})
+
+export type MembershipFormValues = z.infer<typeof membershipSchema>

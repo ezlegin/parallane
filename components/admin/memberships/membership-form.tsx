@@ -1,84 +1,65 @@
 "use client"
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Controller, useForm } from "react-hook-form"
 
-import { cn } from "@/lib/utils"
-
+import PaymentCombobox from "@/components/PaymentCombobox"
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
-
-const membershipSchema = z.object({
-  userId: z.string().min(1, "User is required"),
-  paymentId: z.string().optional(),
-  from: z.string().min(1, "Start date is required"),
-  expiresAt: z.string().min(1, "Expiration date is required"),
-  period: z.enum(["monthly", "annual"]),
-})
-
-export type MembershipFormValues = z.infer<typeof membershipSchema>
-
-type UserOption = {
-  id: string
-  name: string
-  email: string
-}
-
-type PaymentOption = {
-  id: string
-  userName: string
-  totalPaid: number
-  paidAt: string
-}
+import UserCombobox from "@/components/UserCombobox"
+import { MembershipFormValues, membershipSchema } from "@/lib/formSchema"
+import { Membership, Payment, User } from "@/prisma/generated/prisma/client"
+import { cn } from "cn"
+import { addMonths, format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+import { createMembership, updateMembership } from "@/actions/membership"
+import { handleRes } from "@/lib/handleRes"
+import { useRouter } from "next/navigation"
 
 type MembershipFormProps = {
-  defaultValues: MembershipFormValues
-  users: UserOption[]
-  payments: PaymentOption[]
-  onSubmit?: (values: MembershipFormValues) => void
+  membership?: Membership & { payment: Payment | null; user: User }
 }
 
-export function MembershipForm({
-  defaultValues,
-  users,
-  payments,
-  onSubmit,
-}: MembershipFormProps) {
+export function MembershipForm({ membership }: MembershipFormProps) {
+  const router = useRouter()
+
   const form = useForm<MembershipFormValues>({
     resolver: zodResolver(membershipSchema),
-    defaultValues,
+    defaultValues: {
+      expiresAt: membership?.expiresAt ?? addMonths(new Date(), 1),
+      from: membership?.startsAt ?? new Date(),
+      paymentId: membership?.payment?.id ?? "",
+      period: membership?.period ?? "monthly",
+      userId: membership?.userId ?? "",
+    },
   })
 
+  const onSubmit = async (data: MembershipFormValues) => {
+    const res = await (membership
+      ? updateMembership(membership?.id, data)
+      : createMembership(data))
+
+    handleRes(res, {
+      onSuccess: () => !membership && router.push("/admin/memberships"),
+    })
+  }
+
   return (
-    <form
-      onSubmit={form.handleSubmit((values) => {
-        onSubmit?.(values)
-      })}
-    >
+    <form onSubmit={form.handleSubmit(onSubmit)}>
       <Card>
         <CardContent className="pt-6">
           <FieldGroup>
@@ -86,8 +67,8 @@ export function MembershipForm({
               <FieldLabel>User</FieldLabel>
 
               <UserCombobox
+                initialUser={membership?.user}
                 value={form.watch("userId")}
-                users={users}
                 onChange={(value) => {
                   form.setValue("userId", value, {
                     shouldValidate: true,
@@ -106,8 +87,8 @@ export function MembershipForm({
               <FieldLabel>Payment</FieldLabel>
 
               <PaymentCombobox
-                value={form.watch("paymentId")}
-                payments={payments}
+                initiaPayment={membership?.payment}
+                value={form.watch("paymentId") ?? ""}
                 onChange={(value) => {
                   form.setValue("paymentId", value, {
                     shouldValidate: true,
@@ -121,33 +102,95 @@ export function MembershipForm({
             </Field>
 
             <div className="grid gap-6 md:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="from">From</FieldLabel>
+              <Controller
+                name="from"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>From</FieldLabel>
 
-                <Input id="from" type="date" {...form.register("from")} />
+                    <Popover modal={true}>
+                      <PopoverTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? (
+                              format(field.value, "PP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        }
+                      />
 
-                {form.formState.errors.from && (
-                  <FieldDescription className="text-destructive">
-                    {form.formState.errors.from.message}
-                  </FieldDescription>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          className="pointer-events-auto p-3"
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-              </Field>
+              />
 
-              <Field>
-                <FieldLabel htmlFor="expiresAt">Expires at</FieldLabel>
+              <Controller
+                name="expiresAt"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Expires At</FieldLabel>
 
-                <Input
-                  id="expiresAt"
-                  type="date"
-                  {...form.register("expiresAt")}
-                />
+                    <Popover modal={true}>
+                      <PopoverTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? (
+                              format(field.value, "PP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        }
+                      />
 
-                {form.formState.errors.expiresAt && (
-                  <FieldDescription className="text-destructive">
-                    {form.formState.errors.expiresAt.message}
-                  </FieldDescription>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          className="pointer-events-auto p-3"
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-              </Field>
+              />
             </div>
 
             <Field>
@@ -203,166 +246,5 @@ export function MembershipForm({
         </CardFooter>
       </Card>
     </form>
-  )
-}
-
-function UserCombobox({
-  value,
-  users,
-  onChange,
-}: {
-  value: string
-  users: UserOption[]
-  onChange: (value: string) => void
-}) {
-  const [open, setOpen] = useState(false)
-
-  const selectedUser = users.find((user) => user.id === value)
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between font-normal"
-        >
-          {selectedUser ? (
-            <span className="truncate">
-              {selectedUser.name}{" "}
-              <span className="text-muted-foreground">
-                ({selectedUser.email})
-              </span>
-            </span>
-          ) : (
-            <span className="text-muted-foreground">
-              Search user by email...
-            </span>
-          )}
-
-          <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command>
-          <CommandInput placeholder="Search email..." />
-
-          <CommandList>
-            <CommandEmpty>No users found.</CommandEmpty>
-
-            <CommandGroup>
-              {users.map((user) => (
-                <CommandItem
-                  key={user.id}
-                  value={`${user.email} ${user.name}`}
-                  onSelect={() => {
-                    onChange(user.id)
-                    setOpen(false)
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 size-4",
-                      value === user.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-
-                  <div className="min-w-0">
-                    <p className="truncate text-sm">{user.email}</p>
-
-                    <p className="truncate text-xs text-muted-foreground">
-                      {user.name}
-                    </p>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-function PaymentCombobox({
-  value,
-  payments,
-  onChange,
-}: {
-  value?: string
-  payments: PaymentOption[]
-  onChange: (value: string) => void
-}) {
-  const [open, setOpen] = useState(false)
-
-  const selectedPayment = payments.find((payment) => payment.id === value)
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between font-normal"
-        >
-          {selectedPayment ? (
-            <span className="truncate">
-              {selectedPayment.id}{" "}
-              <span className="text-muted-foreground">
-                · ${selectedPayment.totalPaid}
-              </span>
-            </span>
-          ) : (
-            <span className="text-muted-foreground">Search payment ID...</span>
-          )}
-
-          <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command>
-          <CommandInput placeholder="Search payment ID..." />
-
-          <CommandList>
-            <CommandEmpty>No payments found.</CommandEmpty>
-
-            <CommandGroup>
-              {payments.map((payment) => (
-                <CommandItem
-                  key={payment.id}
-                  value={`${payment.id} ${payment.userName}`}
-                  onSelect={() => {
-                    onChange(payment.id)
-                    setOpen(false)
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 size-4",
-                      value === payment.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-
-                  <div className="min-w-0">
-                    <p className="truncate font-mono text-sm">{payment.id}</p>
-
-                    <p className="truncate text-xs text-muted-foreground">
-                      {payment.userName} · ${payment.totalPaid} ·{" "}
-                      {payment.paidAt}
-                    </p>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
   )
 }
