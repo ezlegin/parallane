@@ -1,15 +1,16 @@
 "use server"
 
 import { StudentFormTypes } from "@/lib/formSchema"
-import { db } from "@/prisma/db"
+import { prisma } from "@/prisma/prisma"
 import bcrypt from "bcrypt"
+import { revalidatePath } from "next/cache"
 
 export async function createStudent(data: StudentFormTypes) {
   const { email, fullName, password } = data
 
   try {
-    const existingStudent = await db.orm.public.User.first({
-      email,
+    const existingStudent = await prisma.user.findFirst({
+      where: { email },
     })
 
     if (existingStudent) {
@@ -18,10 +19,12 @@ export async function createStudent(data: StudentFormTypes) {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    await db.orm.public.User.create({
-      fullName,
-      email,
-      password: hashedPassword,
+    await prisma.user.create({
+      data: {
+        fullName,
+        email,
+        password: hashedPassword,
+      },
     })
 
     return {
@@ -37,16 +40,20 @@ export async function updateStudent(id: string, data: StudentFormTypes) {
   const { email, fullName, password } = data
 
   try {
-    const student = await db.orm.public.User.first({
-      id,
+    const student = await prisma.user.findFirst({
+      where: {
+        id,
+      },
     })
 
     if (!student) {
       throw new Error("Student not found")
     }
 
-    const existingStudent = await db.orm.public.User.first({
-      email,
+    const existingStudent = await prisma.user.findFirst({
+      where: {
+        email,
+      },
     })
 
     if (existingStudent && existingStudent.id !== id) {
@@ -55,10 +62,13 @@ export async function updateStudent(id: string, data: StudentFormTypes) {
 
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    await db.orm.public.User.where({ id }).update({
-      fullName,
-      email,
-      password: password ? hashedPassword : undefined,
+    await prisma.user.update({
+      where: { id },
+      data: {
+        fullName,
+        email,
+        password: password ? hashedPassword : undefined,
+      },
     })
 
     return {
@@ -71,13 +81,17 @@ export async function updateStudent(id: string, data: StudentFormTypes) {
 
 export async function deleteStudent(id: string) {
   try {
-    const student = await db.orm.public.User.first({
-      id,
+    const student = await prisma.user.findFirst({
+      where: {
+        id,
+      },
     })
 
     if (!student) throw new Error("Student not found")
 
-    await db.orm.public.User.where({ id }).delete()
+    await prisma.user.delete({ where: { id } })
+
+    revalidatePath("/admin/students")
 
     return {
       success: "user deleted successfully.",

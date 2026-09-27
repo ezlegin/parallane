@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/card"
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -20,21 +19,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/toast"
 import { StudentFormTypes, studentFormSchema } from "@/lib/formSchema"
-import { Models } from "@/prisma/contract"
+import { User } from "@/prisma/generated/prisma/client"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Shape } from "@prisma/orm-postgres/components"
-import { Eye, EyeOff, Loader2, Save } from "lucide-react"
+import { Loader2, Save } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 
-type StudentFormProps = {
-  student?: Shape<Models.public_User>
-}
-
-export function StudentForm({ student }: StudentFormProps) {
+export function StudentForm({ student }: { student: User }) {
   const router = useRouter()
-  const [showPassword, setShowPassword] = useState(false)
 
   const isEditing = !!student
 
@@ -81,105 +73,54 @@ export function StudentForm({ student }: StudentFormProps) {
 
         <CardContent>
           <FieldGroup>
-            {/* Name */}
-            <Field data-invalid={!!form.formState.errors.fullName}>
-              <FieldLabel htmlFor="name">Full name</FieldLabel>
-
-              <Input
-                id="name"
-                placeholder="Alex Morgan"
-                autoComplete="name"
-                aria-invalid={!!form.formState.errors.fullName}
-                {...form.register("fullName")}
-              />
-
-              {form.formState.errors.fullName && (
-                <FieldError>
-                  {form.formState.errors.fullName.message}
-                </FieldError>
+            <Controller
+              name="fullName"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Full Name</FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Full Name"
+                  />
+                </Field>
               )}
-            </Field>
+            />
 
-            {/* Email */}
-            <Field data-invalid={!!form.formState.errors.email}>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-
-              <Input
-                id="email"
-                type="email"
-                placeholder="alex@example.com"
-                autoComplete="email"
-                disabled={isEditing}
-                aria-invalid={!!form.formState.errors.email}
-                {...form.register("email")}
-              />
-
-              {isEditing ? (
-                <FieldDescription>
-                  Email addresses cannot be changed from the admin panel.
-                </FieldDescription>
-              ) : (
-                <FieldDescription>
-                  This email will be used by the student to sign in.
-                </FieldDescription>
+            <Controller
+              name="email"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Email</FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Email Address"
+                  />
+                </Field>
               )}
+            />
 
-              {form.formState.errors.email && (
-                <FieldError>{form.formState.errors.email.message}</FieldError>
-              )}
-            </Field>
-
-            {/* Password */}
-            <Field data-invalid={!!form.formState.errors.password}>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
-
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder={
-                    isEditing
-                      ? "Leave empty to keep current password"
-                      : "Enter a password"
-                  }
-                  autoComplete={isEditing ? "new-password" : "new-password"}
-                  className="pr-10"
-                  aria-invalid={!!form.formState.errors.password}
-                  {...form.register("password")}
-                />
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-0 right-0 size-10"
-                  onClick={() => setShowPassword((value) => !value)}
-                  tabIndex={-1}
-                >
-                  {showPassword ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
+            <Controller
+              name="password"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Password</FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="******"
+                    type="password"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
                   )}
-
-                  <span className="sr-only">
-                    {showPassword ? "Hide password" : "Show password"}
-                  </span>
-                </Button>
-              </div>
-
-              <FieldDescription>
-                {isEditing
-                  ? "Only enter a password if you want to change it."
-                  : "The password must contain at least 8 characters."}
-              </FieldDescription>
-
-              {form.formState.errors.password && (
-                <FieldError>
-                  {form.formState.errors.password.message}
-                </FieldError>
+                </Field>
               )}
-            </Field>
+            />
           </FieldGroup>
         </CardContent>
 

@@ -70,9 +70,6 @@ export default function LoginForm() {
                         aria-invalid={fieldState.invalid}
                         label="Full Name"
                       />
-                      {/* {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )} */}
                     </Field>
                   )}
                 />

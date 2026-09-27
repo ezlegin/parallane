@@ -8,50 +8,50 @@ datasource db {
 }
 
 enum CourseStatus {
-  DRAFT
-  PUBLISHED
+  draft
+  published
 }
 
 enum CourseCategory {
-  WEB_DESIGN
-  FRONTEND
-  BACKEND
+  web_design
+  frontend
+  backend
 }
 
 enum LessonType {
-  VIDEO
-  DOCUMENT
+  video
+  document
 }
 
 enum MembershipPeriod {
-  MONTHLY
-  ANNUAL
+  monthly
+  annual
 }
 
 enum MembershipStatus {
-  ACTIVE
-  EXPIRED
+  active
+  expired
 }
 
 enum PaymentStatus {
-  PENDING
-  SUCCESS
-  FAILED
+  pending
+  success
+  failed
 }
 
 enum DiscountType {
-  FIXED
-  PERCENTAGE
+  fixed
+  percentage
 }
 
 enum CouponStatus {
-  ACTIVE
-  DISABLED
+  active
+  disabled
 }
 
 enum TutorMessageRole {
-  USER
-  TUTOR
+  user
+  tutor
 }
 
 model Admin {
@@ -71,7 +71,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  membership  Membership?
+  memberships Membership[]
   payments    Payment[]
   enrollments Enrollment[]
 
@@ -96,7 +96,7 @@ model Course {
   description String
 
   category CourseCategory
-  status   CourseStatus   @default(DRAFT)
+  status   CourseStatus   @default(draft)
 
   audience String[]
 
@@ -158,13 +158,13 @@ model Lesson {
 model Membership {
   id String @id @default(uuid())
 
-  userId String @unique
+  userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  status MembershipStatus @default(ACTIVE)
+  status MembershipStatus @default(active)
   period MembershipPeriod
 
-  price Decimal
+  price Float
 
   startsAt  DateTime @default(now())
   expiresAt DateTime
@@ -188,11 +188,11 @@ model Payment {
   membershipId String?
   membership   Membership? @relation(fields: [membershipId], references: [id], onDelete: SetNull)
 
-  status PaymentStatus @default(PENDING)
+  status PaymentStatus @default(pending)
 
-  totalAmount    Decimal
-  discountAmount Decimal
-  paidAmount     Decimal
+  totalAmount    Float
+  discountAmount Float
+  paidAmount     Float
 
   discountType DiscountType?
   discountCode String?
@@ -217,9 +217,9 @@ model Coupon {
   code String @unique
 
   discountType   DiscountType
-  discountAmount Decimal
+  discountAmount Float
 
-  status CouponStatus @default(ACTIVE)
+  status CouponStatus @default(active)
 
   expiresAt DateTime?
 
@@ -247,7 +247,7 @@ model CouponUsage {
   paymentId String  @unique
   payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
-  discountAmount Decimal
+  discountAmount Float
 
   createdAt DateTime @default(now())
 

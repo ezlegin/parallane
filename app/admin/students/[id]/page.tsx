@@ -1,45 +1,41 @@
-import Link from "next/link"
-import { notFound } from "next/navigation"
-import {
-  ArrowLeft,
-  BookOpen,
-  CalendarDays,
-  CreditCard,
-  Mail,
-  UserRound,
-} from "lucide-react"
-
-import { getAdminStudent } from "@/lib/admin-students"
-
+import MembershipBadge from "@/components/MembershipBadge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { getInitials } from "@/lib/getInitials"
+import { prisma } from "@/prisma/prisma"
+import { format } from "date-fns"
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  CalendarDays,
+  CreditCard,
+  Mail,
+} from "lucide-react"
+import Link from "next/link"
+import { notFound } from "next/navigation"
 
-type StudentPageProps = {
+type Props = {
   params: Promise<{ id: string }>
 }
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(date))
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase()
-}
-
-export default async function StudentPage({ params }: StudentPageProps) {
+export default async function StudentPage({ params }: Props) {
   const { id } = await params
-  const student = getAdminStudent(id)
+  const student = await prisma.user.findFirst({
+    where: { id },
+    include: {
+      enrollments: {
+        include: {
+          course: { select: { title: true } },
+        },
+      },
+      memberships: {
+        orderBy: { expiresAt: "desc" },
+      },
+    },
+  })
 
   if (!student) {
     notFound()
@@ -59,7 +55,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
 
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              {student.name}
+              {student.fullName}
             </h1>
             <p className="text-sm text-muted-foreground">Student profile</p>
           </div>
@@ -76,29 +72,19 @@ export default async function StudentPage({ params }: StudentPageProps) {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center">
               <div className="flex size-20 items-center justify-center rounded-full border bg-muted text-lg font-medium">
-                {getInitials(student.name)}
+                {getInitials(student.fullName)}
               </div>
 
-              <h2 className="mt-4 font-semibold">{student.name}</h2>
+              <h2 className="mt-4 font-semibold">{student.fullName}</h2>
 
               <p className="mt-1 text-sm text-muted-foreground">
                 {student.email}
               </p>
 
               <div className="mt-4">
-                {student.membership.status === "active" ? (
-                  <Badge variant="secondary" className="rounded-full">
-                    Active membership
-                  </Badge>
-                ) : student.membership.status === "expired" ? (
-                  <Badge variant="outline" className="rounded-full">
-                    Expired membership
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="rounded-full">
-                    No membership
-                  </Badge>
-                )}
+                <MembershipBadge
+                  status={student.memberships.at(-1)?.status ?? "none"}
+                />
               </div>
             </div>
 
@@ -117,7 +103,7 @@ export default async function StudentPage({ params }: StudentPageProps) {
                 <CalendarDays className="size-4 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground">Joined</p>
-                  <p className="text-sm">{formatDate(student.joinedAt)}</p>
+                  <p className="text-sm">{format(student.createdAt, "PP")}</p>
                 </div>
               </div>
             </div>
@@ -130,12 +116,12 @@ export default async function StudentPage({ params }: StudentPageProps) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm font-medium">
                 <CreditCard className="size-4" />
-                Membership
+                Memberships
               </CardTitle>
             </CardHeader>
 
             <CardContent>
-              {student.membership.status === "none" ? (
+              {student.memberships.length < 1 ? (
                 <div>
                   <p className="text-sm font-medium">No membership</p>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -143,21 +129,32 @@ export default async function StudentPage({ params }: StudentPageProps) {
                   </p>
                 </div>
               ) : (
-                <div>
-                  <p className="text-sm font-medium">
-                    {student.membership.status === "active"
-                      ? "Active"
-                      : "Expired"}
-                  </p>
-
-                  {student.membership.expiresAt && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {student.membership.status === "active"
-                        ? `Expires ${formatDate(student.membership.expiresAt)}`
-                        : `Expired ${formatDate(student.membership.expiresAt)}`}
+                student.memberships.map((membership, idx) => (
+                  <div key={idx} className="flex justify-between border-b pb-2">
+                    <p className="text-sm font-medium capitalize">
+                      <MembershipBadge status={membership.status} />
                     </p>
-                  )}
-                </div>
+
+                    <Badge
+                      className="capitalize"
+                      variant={
+                        membership.period === "monthly" ? "outline" : "default"
+                      }
+                    >
+                      {membership.period}
+                    </Badge>
+
+                    <div className="flex items-center gap-2 text-xs">
+                      <p className="text-muted-foreground">
+                        {format(membership.expiresAt, "PP")}
+                      </p>
+                      <ArrowRight size={13} />
+                      <p className="text-muted-foreground">
+                        {format(membership.expiresAt, "PP")}
+                      </p>
+                    </div>
+                  </div>
+                ))
               )}
             </CardContent>
           </Card>
@@ -171,29 +168,26 @@ export default async function StudentPage({ params }: StudentPageProps) {
             </CardHeader>
 
             <CardContent>
-              <p className="text-3xl font-semibold">
-                {student.enrolledCourses}
-              </p>
-
-              <p className="mt-1 text-sm text-muted-foreground">
-                courses enrolled
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="sm:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm font-medium">
-                <UserRound className="size-4" />
-                Student activity
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Course progress, payments, Q&A conversations and other student
-                activity will appear here.
-              </p>
+              {student.enrollments.length < 1 ? (
+                <div>
+                  <p className="text-sm font-medium">No membership</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    This student currently has no membership.
+                  </p>
+                </div>
+              ) : (
+                student.enrollments.map((en, idx) => (
+                  <div
+                    className="flex items-center justify-between border-b pb-2"
+                    key={idx}
+                  >
+                    <span>{en.course.title}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {format(en.enrolledAt, "PP")}
+                    </span>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
