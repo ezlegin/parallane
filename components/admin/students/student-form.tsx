@@ -25,7 +25,7 @@ import { Loader2, Save } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 
-export function StudentForm({ student }: { student: User }) {
+export function StudentForm({ student }: { student?: Omit<User, "password"> }) {
   const router = useRouter()
 
   const isEditing = !!student

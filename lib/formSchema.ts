@@ -6,7 +6,7 @@ export const studentFormSchema = z.object({
     .min(2, "Name must be at least 2 characters.")
     .max(100, "Name is too long."),
 
-  email: z.string().email("Please enter a valid email address."),
+  email: z.email("Please enter a valid email address."),
 
   password: z
     .string()

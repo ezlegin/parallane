@@ -2,10 +2,9 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { getAdminStudent } from "@/lib/admin-students"
-
 import { StudentForm } from "@/components/admin/students/student-form"
 import { Button } from "@/components/ui/button"
+import { prisma } from "@/prisma/prisma"
 
 type EditStudentPageProps = {
   params: Promise<{ id: string }>
@@ -16,7 +15,10 @@ export default async function EditStudentPage({
 }: EditStudentPageProps) {
   const { id } = await params
 
-  const student = getAdminStudent(id)
+  const student = await prisma.user.findFirst({
+    where: { id },
+    omit: { password: true },
+  })
 
   if (!student) {
     notFound()
@@ -39,7 +41,7 @@ export default async function EditStudentPage({
           </h1>
 
           <p className="text-sm text-muted-foreground">
-            Update {student.name}&apos;s account information.
+            Update {student.fullName}&apos;s account information.
           </p>
         </div>
       </div>

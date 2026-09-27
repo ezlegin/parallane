@@ -47,6 +47,12 @@ function ThemeHotkey() {
         return
       }
 
+      // Chrome/Edge fire a synthetic keydown with no `key` when an
+      // autofill suggestion (name/email/etc.) is applied. Bail out here.
+      if (typeof event.key !== "string") {
+        return
+      }
+
       if (event.key.toLowerCase() !== "d") {
         return
       }
