@@ -2,16 +2,15 @@
 
 import { Plus, Trash2 } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
-import { useFieldArray } from "react-hook-form"
+import { Controller, useFieldArray } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
-import { Field, FieldLabel } from "@/components/ui/field"
+import { Field, FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-
-import type { CourseFormValues } from "./course-form"
+import { CourseFormType } from "@/lib/formSchema"
 
 type Props = {
-  form: UseFormReturn<CourseFormValues>
+  form: UseFormReturn<CourseFormType>
 }
 
 export function CourseAudience({ form }: Props) {
@@ -33,14 +32,22 @@ export function CourseAudience({ form }: Props) {
       <div className="space-y-3">
         {fields.map((field, index) => (
           <div key={field.id} className="flex items-end gap-2">
-            <Field className="flex-1">
-              <FieldLabel>Audience {index + 1}</FieldLabel>
-
-              <Input
-                placeholder="e.g. Frontend developers"
-                {...form.register(`audience.${index}.value`)}
-              />
-            </Field>
+            <Controller
+              name={`audience.${index}.value`}
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    label={`Audience ${index + 1}`}
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
             <Button
               type="button"

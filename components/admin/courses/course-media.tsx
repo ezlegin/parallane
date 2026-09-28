@@ -1,19 +1,18 @@
 "use client"
 
-import type { UseFormReturn } from "react-hook-form"
+import { Controller, type UseFormReturn } from "react-hook-form"
 
 import {
   Field,
-  FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-
-import type { CourseFormValues } from "./course-form"
+import { CourseFormType } from "@/lib/formSchema"
 
 type Props = {
-  form: UseFormReturn<CourseFormValues>
+  form: UseFormReturn<CourseFormType>
 }
 
 export function CourseMedia({ form }: Props) {
@@ -28,35 +27,41 @@ export function CourseMedia({ form }: Props) {
       </div>
 
       <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="tizerUrl">Tizer URL</FieldLabel>
+        <Controller
+          name="tizerUrl"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Tizer URL</FieldLabel>
 
-          <Input
-            id="tizerUrl"
-            placeholder="/tizer.mp4"
-            {...form.register("tizerUrl")}
-          />
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                placeholder="https://..."
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          name="duration"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Duration</FieldLabel>
 
-          <FieldDescription>
-            Video shown before a student enrolls in the course.
-          </FieldDescription>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="duration">Duration</FieldLabel>
-
-          <Input
-            id="duration"
-            type="number"
-            min={0}
-            placeholder="120"
-            {...form.register("duration", {
-              valueAsNumber: true,
-            })}
-          />
-
-          <FieldDescription>Total course duration in minutes.</FieldDescription>
-        </Field>
+              <Input
+                {...field}
+                id="duration"
+                type="number"
+                step={1}
+                min={0}
+                placeholder="120"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
       </FieldGroup>
     </section>
   )

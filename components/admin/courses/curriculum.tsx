@@ -1,11 +1,11 @@
 "use client"
 
-import { GripVertical, Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
-import { useFieldArray } from "react-hook-form"
+import { Controller, useFieldArray } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field"
+import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -17,10 +17,10 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 
-import type { CourseFormValues } from "./course-form"
+import { CourseFormType } from "@/lib/formSchema"
 
 type Props = {
-  form: UseFormReturn<CourseFormValues>
+  form: UseFormReturn<CourseFormType>
 }
 
 export function Curriculum({ form }: Props) {
@@ -118,20 +118,30 @@ function SeasonField({ form, seasonIndex, onRemove }: SeasonFieldProps) {
     <div className="overflow-hidden rounded-xl border">
       {/* Season header */}
       <div className="flex items-center gap-3 bg-muted/30 p-4">
-        <GripVertical className="size-4 shrink-0 text-muted-foreground" />
-
-        <div className="flex-1">
-          <Input
-            placeholder="Season title"
-            className="border-0 bg-transparent px-0 font-semibold shadow-none focus-visible:ring-0"
-            {...form.register(`seasons.${seasonIndex}.title`)}
-          />
-        </div>
-
-        <Button type="button" variant="ghost" size="icon" onClick={onRemove}>
-          <Trash2 />
-          <span className="sr-only">Remove season</span>
-        </Button>
+        <Controller
+          name={`seasons.${seasonIndex}.title`}
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <div className="grid grid-cols-[1fr_auto] items-center gap-2">
+                <Input
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  label={`Season ${seasonIndex + 1}`}
+                  className="w-full min-w-0 flex-1 rounded-none border-x-0 border-t-0 bg-transparent focus-visible:ring-0"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={onRemove}
+                >
+                  <Trash2 />
+                </Button>
+              </div>
+            </Field>
+          )}
+        />
       </div>
 
       <Separator />
@@ -187,78 +197,97 @@ function LessonField({
 
   return (
     <div className="rounded-lg border p-2">
-      <div className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <GripVertical className="size-4 text-muted-foreground" />
-
-          <span className="text-sm font-medium">Lesson {lessonIndex + 1}</span>
-        </div>
-
-        <Button type="button" variant="ghost" size="icon" onClick={onRemove}>
-          <Trash2 />
-          <span className="sr-only">Remove lesson</span>
-        </Button>
-      </div>
-
       <div className="space-y-3">
-        <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] items-center gap-2">
-          <Field className="w-full">
-            <Input
-              label="e.g. Introduction to React"
-              {...form.register(`${baseName}.title`)}
-            />
-          </Field>
+        <div className="grid grid-cols-[auto_1fr_1fr_auto_auto_auto] items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onRemove}
+          >
+            <Trash2 />
+            <span className="sr-only">Remove lesson</span>
+          </Button>
+          <Controller
+            name={`${baseName}.title`}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <Input
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  label="e.g. Introduction to React"
+                />
+              </Field>
+            )}
+          />
 
-          <Field className="w-full">
-            <Input label="url" {...form.register(`${baseName}.url`)} />
-          </Field>
+          <Controller
+            name={`${baseName}.url`}
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <Input
+                  {...field}
+                  aria-invalid={fieldState.invalid}
+                  label="https://..."
+                />
+              </Field>
+            )}
+          />
 
-          <Field className="w-22">
-            <Select
-              value={form.watch(`${baseName}.type`)}
-              onValueChange={(value) =>
-                form.setValue(`${baseName}.type`, value as "video" | "doc", {
-                  shouldDirty: true,
-                })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
+          <Controller
+            name={`${baseName}.type`}
+            control={form.control}
+            render={({ field }) => (
+              <Field className="w-22">
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
 
-              <SelectContent>
-                <SelectItem value="video">Video</SelectItem>
+                  <SelectContent>
+                    <SelectItem value="video">Video</SelectItem>
 
-                <SelectItem value="doc">Document</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
+                    <SelectItem value="doc">Document</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
+          />
 
-          <Field className="w-22">
-            <Input
-              type="number"
-              min={0}
-              label="duration"
-              {...form.register(`${baseName}.duration`, {
-                valueAsNumber: true,
-              })}
-            />
-          </Field>
+          <Controller
+            name={`${baseName}.duration`}
+            control={form.control}
+            render={({ field }) => (
+              <Field className="w-22">
+                <Input
+                  {...field}
+                  type="number"
+                  step={1}
+                  min={0}
+                  label="duration"
+                />
+              </Field>
+            )}
+          />
 
-          <Field orientation="horizontal">
-            <Switch
-              checked={form.watch(`${baseName}.isFree`)}
-              onCheckedChange={(checked) =>
-                form.setValue(`${baseName}.isFree`, checked, {
-                  shouldDirty: true,
-                })
-              }
-            />
+          <Controller
+            name={`${baseName}.isFree`}
+            control={form.control}
+            render={({ field }) => (
+              <Field className="gap-0">
+                <FieldLabel className="text-xs text-muted-foreground">
+                  Is Free?
+                </FieldLabel>
 
-            <FieldContent>
-              <FieldLabel>Is Free?</FieldLabel>
-            </FieldContent>
-          </Field>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </Field>
+            )}
+          />
         </div>
       </div>
     </div>

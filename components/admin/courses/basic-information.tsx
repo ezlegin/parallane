@@ -1,69 +1,86 @@
 "use client"
 
-import type { UseFormReturn } from "react-hook-form"
+import { Controller, type UseFormReturn } from "react-hook-form"
 
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-
-import type { CourseFormValues } from "./course-form"
+import { CourseFormType } from "@/lib/formSchema"
 
 type Props = {
-  form: UseFormReturn<CourseFormValues>
+  form: UseFormReturn<CourseFormType>
 }
 
 export function BasicInformation({ form }: Props) {
   return (
     <section className="space-y-5">
       <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="title">Title</FieldLabel>
-
-          <Input
-            id="title"
-            placeholder="e.g. React"
-            {...form.register("title")}
-          />
-
-          {form.formState.errors.title && (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.title.message}
-            </p>
+        <Controller
+          name="title"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Title</FieldLabel>
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                placeholder="e.g. React"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="slug">Slug</FieldLabel>
-
-          <Input id="slug" placeholder="react" {...form.register("slug")} />
-
-          {form.formState.errors.slug && (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.slug.message}
-            </p>
+        />
+        <Controller
+          name="slug"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Slug</FieldLabel>
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                placeholder="react"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
           )}
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="summary">Summary</FieldLabel>
-
-          <Input
-            id="summary"
-            placeholder="Learn how to build modern applications..."
-            {...form.register("summary")}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="description">Description</FieldLabel>
-
-          <Textarea
-            id="description"
-            placeholder="Describe the course..."
-            className="min-h-36 resize-y"
-            {...form.register("description")}
-          />
-        </Field>
+        />
+        <Controller
+          name="summary"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Summary</FieldLabel>
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                placeholder="Learn how to build modern applications..."
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        <Controller
+          name="description"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Description</FieldLabel>
+              <Textarea
+                {...field}
+                id="description"
+                placeholder="Describe the course..."
+                className="min-h-36 resize-y"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
       </FieldGroup>
     </section>
   )

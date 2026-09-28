@@ -2,76 +2,66 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
-
 import { Button } from "@/components/ui/button"
+import { courseFormSchema, CourseFormType } from "@/lib/formSchema"
+import { Course, Lesson, Season } from "@/prisma/generated/prisma/client"
 import { BasicInformation } from "./basic-information"
 import { CourseAudience } from "./course-audience"
 import { CourseMedia } from "./course-media"
 import { CourseSettings } from "./course-settings"
 import { Curriculum } from "./curriculum"
+import { createCourse, updateCourse } from "@/actions/course"
+import { handleRes } from "@/lib/handleRes"
+import { useRouter } from "next/navigation"
 
-const lessonSchema = z.object({
-  title: z.string().min(1, "Lesson title is required."),
-  url: z.string().min(1, "Lesson URL is required."),
-  type: z.enum(["video", "doc"]),
-  isFree: z.boolean(),
-  duration: z.coerce.number().min(0, "Duration cannot be negative."),
-})
-
-const seasonSchema = z.object({
-  title: z.string().min(1, "Season title is required."),
-  lessons: z.array(lessonSchema),
-})
-
-const courseSchema = z.object({
-  title: z.string().min(1, "Title is required."),
-  slug: z
-    .string()
-    .min(1, "Slug is required.")
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Slug must contain lowercase letters, numbers and hyphens."
-    ),
-  summary: z.string().min(1, "Summary is required."),
-  description: z.string().min(1, "Description is required."),
-  category: z.enum(["development", "design", "ai"]),
-  status: z.enum(["published", "draft"]),
-  audience: z.array(
-    z.object({
-      value: z.string().min(1, "Audience item cannot be empty."),
-    })
-  ),
-  seasons: z.array(seasonSchema),
-  tizerUrl: z.string(),
-  duration: z.coerce.number().min(0),
-})
-
-export type CourseFormValues = z.infer<typeof courseSchema>
+interface CourseType extends Course {
+  seasons: (Season & { lessons: Lesson[] })[]
+}
 
 type Props = {
-  course?: CourseFormValues
+  course?: CourseType
 }
 
 export function CourseForm({ course }: Props) {
-  const form = useForm<CourseFormValues>({
-    resolver: zodResolver(courseSchema),
-    defaultValues: course ?? {
-      title: "",
-      slug: "",
-      summary: "",
-      description: "",
-      category: "development",
-      status: "draft",
-      audience: [{ value: "" }],
-      seasons: [],
-      tizerUrl: "",
-      duration: 0,
+  const router = useRouter()
+  const form = useForm<CourseFormType>({
+    resolver: zodResolver(courseFormSchema),
+    defaultValues: {
+      title: course?.title ?? "",
+      slug: course?.slug ?? "",
+      summary: course?.summary ?? "",
+      description: course?.description ?? "",
+      category: course?.category ?? "frontEnd",
+      status: course?.status ?? "draft",
+      audience: course
+        ? course.audience.map((a) => ({ value: a }))
+        : [{ value: "" }],
+      seasons: course
+        ? course.seasons.map((s) => ({
+            title: s.title,
+            lessons: s.lessons.map((l) => ({
+              title: l.title,
+              url: l.url,
+              type: l.type,
+              duration: l.duration.toString(),
+              isFree: l.isFree,
+            })),
+          }))
+        : [],
+      tizerUrl: course?.teaserUrl ?? "",
+      duration: course?.duration.toString() ?? "0",
     },
   })
 
-  const handleSubmit = (values: CourseFormValues) => {
-    console.log(values)
+  const handleSubmit = async (data: CourseFormType) => {
+    console.log("s")
+    const res = await (course
+      ? updateCourse(course.id, data)
+      : createCourse(data))
+
+    handleRes(res, {
+      onSuccess: () => !course && router.push("/admin/courses"),
+    })
   }
 
   return (

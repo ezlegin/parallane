@@ -45,3 +45,41 @@ export const membershipSchema = z.object({
 })
 
 export type MembershipFormValues = z.infer<typeof membershipSchema>
+
+const lessonSchema = z.object({
+  title: z.string().min(1, "Lesson title is required."),
+  url: z.url(),
+  type: z.enum(["video", "doc"]),
+  isFree: z.boolean(),
+  duration: z.string().min(0, "Duration cannot be negative."),
+})
+
+const seasonSchema = z.object({
+  title: z.string().min(1, "Season title is required."),
+  lessons: z.array(lessonSchema),
+})
+
+export const courseFormSchema = z.object({
+  title: z.string().min(1, "Title is required."),
+  slug: z
+    .string()
+    .min(1, "Slug is required.")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Slug must contain lowercase letters, numbers and hyphens."
+    ),
+  summary: z.string().min(1, "Summary is required."),
+  description: z.string().min(1, "Description is required."),
+  category: z.enum(["webDesign", "frontEnd", "backEnd"]),
+  status: z.enum(["published", "draft"]),
+  audience: z.array(
+    z.object({
+      value: z.string().min(1, "Audience item cannot be empty."),
+    })
+  ),
+  seasons: z.array(seasonSchema),
+  tizerUrl: z.url(),
+  duration: z.string().min(0),
+})
+
+export type CourseFormType = z.infer<typeof courseFormSchema>

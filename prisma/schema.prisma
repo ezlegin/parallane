@@ -13,14 +13,14 @@ enum CourseStatus {
 }
 
 enum CourseCategory {
-  web_design
-  frontend
-  backend
+  webDesign
+  frontEnd
+  backEnd
 }
 
 enum LessonType {
   video
-  document
+  doc
 }
 
 enum MembershipPeriod {
@@ -128,14 +128,12 @@ model Season {
   id String @id @default(uuid())
 
   title String
-  order Int
 
   courseId String
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   lessons Lesson[]
 
-  @@unique([courseId, order])
   @@index([courseId])
 }
 
@@ -143,7 +141,6 @@ model Lesson {
   id String @id @default(uuid())
 
   title String
-  order Int
 
   type LessonType
   url  String
@@ -157,7 +154,6 @@ model Lesson {
   progress           LessonProgress[]
   tutorConversations TutorConversation[]
 
-  @@unique([seasonId, order])
   @@index([seasonId])
 }
 
