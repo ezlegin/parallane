@@ -193,8 +193,8 @@ model Payment {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  membershipId String     @unique
-  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  membershipId String?     @unique
+  membership   Membership? @relation(fields: [membershipId], references: [id], onDelete: Cascade)
 
   status PaymentStatus @default(pending)
 

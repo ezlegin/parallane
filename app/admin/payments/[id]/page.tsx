@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 
-import { getAdminPayment } from "@/lib/admin-payments"
 import { PaymentForm } from "@/components/admin/payments/payment-form"
+import { prisma } from "@/prisma/prisma"
 
 type Props = {
   params: Promise<{
@@ -12,14 +12,17 @@ type Props = {
 export default async function AdminPaymentPage({ params }: Props) {
   const { id } = await params
 
-  const payment = getAdminPayment(id)
+  const payment = await prisma.payment.findFirst({
+    where: { id },
+    include: { user: { omit: { password: true } }, membership: true },
+  })
 
   if (!payment) {
     notFound()
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="space-y-8">
       <div>
         <p className="text-sm text-muted-foreground">Payment management</p>
 
@@ -28,19 +31,11 @@ export default async function AdminPaymentPage({ params }: Props) {
         </h1>
 
         <p className="mt-1 text-sm text-muted-foreground">
-          {payment.user.name} · {payment.user.email}
+          {payment.user.fullName} · {payment.user.email}
         </p>
       </div>
 
-      <PaymentForm
-        defaultValues={{
-          discountCode: payment.discountCode ?? "",
-          discountAmount: payment.discountAmount,
-          discountType: payment.discountType,
-          total: payment.total,
-          totalPaid: payment.totalPaid,
-        }}
-      />
+      <PaymentForm payment={payment} />
     </div>
   )
 }

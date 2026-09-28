@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-
 import PaymentCombobox from "@/components/PaymentCombobox"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -70,9 +69,7 @@ export function MembershipForm({ membership }: MembershipFormProps) {
                 initialUser={membership?.user}
                 value={form.watch("userId")}
                 onChange={(value) => {
-                  form.setValue("userId", value, {
-                    shouldValidate: true,
-                  })
+                  form.setValue("userId", value)
                 }}
               />
 
@@ -90,9 +87,7 @@ export function MembershipForm({ membership }: MembershipFormProps) {
                 initiaPayment={membership?.payment}
                 value={form.watch("paymentId") ?? ""}
                 onChange={(value) => {
-                  form.setValue("paymentId", value, {
-                    shouldValidate: true,
-                  })
+                  form.setValue("paymentId", value)
                 }}
               />
 
@@ -193,51 +188,53 @@ export function MembershipForm({ membership }: MembershipFormProps) {
               />
             </div>
 
-            <Field>
-              <FieldLabel>Period</FieldLabel>
+            <Controller
+              name="period"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Period</FieldLabel>
 
-              <RadioGroup
-                value={form.watch("period")}
-                onValueChange={(value) => {
-                  form.setValue(
-                    "period",
-                    value as MembershipFormValues["period"],
-                    {
-                      shouldValidate: true,
-                    }
-                  )
-                }}
-                className="grid gap-3 md:grid-cols-2"
-              >
-                <label
-                  htmlFor="monthly"
-                  className="flex cursor-pointer items-center gap-3 rounded-lg border p-4"
-                >
-                  <RadioGroupItem value="monthly" id="monthly" />
+                  <RadioGroup
+                    value={form.watch("period")}
+                    onValueChange={field.onChange}
+                    className="grid gap-3 md:grid-cols-2"
+                  >
+                    <label
+                      htmlFor="monthly"
+                      className="flex cursor-pointer items-center gap-3 rounded-lg border p-4"
+                    >
+                      <RadioGroupItem value="monthly" id="monthly" />
 
-                  <div>
-                    <p className="text-sm font-medium">Monthly</p>
-                    <p className="text-xs text-muted-foreground">
-                      Membership lasts one month.
-                    </p>
-                  </div>
-                </label>
+                      <div>
+                        <p className="text-sm font-medium">Monthly</p>
+                        <p className="text-xs text-muted-foreground">
+                          Membership lasts one month.
+                        </p>
+                      </div>
+                    </label>
 
-                <label
-                  htmlFor="annual"
-                  className="flex cursor-pointer items-center gap-3 rounded-lg border p-4"
-                >
-                  <RadioGroupItem value="annual" id="annual" />
+                    <label
+                      htmlFor="annual"
+                      className="flex cursor-pointer items-center gap-3 rounded-lg border p-4"
+                    >
+                      <RadioGroupItem value="annual" id="annual" />
 
-                  <div>
-                    <p className="text-sm font-medium">Annual</p>
-                    <p className="text-xs text-muted-foreground">
-                      Membership lasts one year.
-                    </p>
-                  </div>
-                </label>
-              </RadioGroup>
-            </Field>
+                      <div>
+                        <p className="text-sm font-medium">Annual</p>
+                        <p className="text-xs text-muted-foreground">
+                          Membership lasts one year.
+                        </p>
+                      </div>
+                    </label>
+                  </RadioGroup>
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
           </FieldGroup>
         </CardContent>
 
