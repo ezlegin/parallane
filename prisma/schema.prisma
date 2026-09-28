@@ -60,6 +60,12 @@ enum TutorConversationStatus {
   closed
 }
 
+enum CourseProgressStatus {
+  notStarted
+  inProgress
+  completed
+}
+
 model Admin {
   id       String @id @default(uuid())
   fullName String
@@ -262,7 +268,8 @@ model CouponUsage {
 }
 
 model Enrollment {
-  id String @id @default(uuid())
+  id        String @id @default(uuid())
+  reference String @unique
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -297,12 +304,12 @@ model CourseProgress {
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   completedLessons Int @default(0)
-  totalLessons     Int @default(0)
+  totalLessons     Int
 
-  percentage Int @default(0)
+  percentage Float                @default(0)
+  stats      CourseProgressStatus @default(notStarted)
 
-  lastLessonId  String?
-  lastWatchedAt DateTime?
+  lastLessonId String?
 
   completedAt DateTime?
 

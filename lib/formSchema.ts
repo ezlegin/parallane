@@ -83,3 +83,11 @@ export const courseFormSchema = z.object({
 })
 
 export type CourseFormType = z.infer<typeof courseFormSchema>
+
+export const enrollmentFormSchema = z.object({
+  userId: z.string().min(1, "User is required"),
+  courseId: z.string().min(1, "Course is required"),
+  enrolledAt: z.date(),
+})
+
+export type EnrollmentFormType = z.infer<typeof enrollmentFormSchema>
