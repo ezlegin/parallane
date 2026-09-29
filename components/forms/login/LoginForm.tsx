@@ -16,10 +16,12 @@ import { googleLogo } from "@/public"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useTransition } from "react"
+import { signIn } from "next-auth/react"
+import { toast } from "@/components/ui/toast"
 
 const formSchema = z.object({
-  fullName: z.string().min(2, "at least 2 characters.").optional(),
+  fullName: z.string().optional(),
   email: z.email(),
   password: z.string().min(8, "at least 8 characters."),
 })
@@ -29,6 +31,7 @@ type FormType = z.infer<typeof formSchema>
 export default function LoginForm() {
   const router = useRouter()
   const [isSignUp, setIsSignUp] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
@@ -43,7 +46,33 @@ export default function LoginForm() {
     if (isSignUp) {
       const res = await createStudent(data as Required<FormType>)
       handleRes(res, { onSuccess: () => router.push("/login/onboarding") })
+    } else {
+      const res = await signIn("user-login", {
+        ...data,
+        redirect: false,
+      })
+
+      if (res.error) {
+        toast.add({
+          title: "Invalid Credentials.",
+          description: "Please check your email and password.",
+          type: "error",
+        })
+      } else {
+        toast.add({
+          title: "Logged In Successfull.",
+          description: "Welcome to parallane user panel.",
+          type: "success",
+        })
+        router.push("/panel")
+      }
     }
+  }
+
+  const onGoogleLogin = () => {
+    startTransition(async () => {
+      console.log("loged in by google.")
+    })
   }
 
   return (
@@ -52,7 +81,13 @@ export default function LoginForm() {
         <GlowingStroke />
 
         <CardContent className="space-y-6">
-          <Button variant={"outline"} className={"h-12 w-full"} size={"lg"}>
+          <Button
+            disabled={isPending}
+            variant={"outline"}
+            className={"h-12 w-full"}
+            size={"lg"}
+            onClick={onGoogleLogin}
+          >
             <Image alt="logo" src={googleLogo} width={20} height={20} />
             Continue with Google
           </Button>

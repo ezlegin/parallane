@@ -1,11 +1,5 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import ParallaneLogo from "@/components/ParallaneLogo"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -16,6 +10,13 @@ import {
 } from "@/components/ui/card"
 import { Field, FieldError, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { toast } from "@/components/ui/toast"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
+import { useTransition } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { login } from "./login"
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -25,8 +26,8 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function page() {
-  const [isLoading, setIsLoading] = useState(false)
-
+  const router = useRouter()
+  const [isPending, startTransintion] = useTransition()
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -35,25 +36,25 @@ export default function page() {
     },
   })
 
-  const onSubmit = async (values: LoginFormValues) => {
-    setIsLoading(true)
+  const onSubmit = (data: LoginFormValues) => {
+    startTransintion(async () => {
+      const res = await login(data)
 
-    try {
-      // TODO: Connect to your authentication endpoint.
-      console.log(values)
-    } finally {
-      setIsLoading(false)
-    }
+      if (res.error) {
+        toast.add({ title: res.error })
+      } else {
+        toast.add({ title: res.success })
+        router.push("/admin/dashboard")
+      }
+    })
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-muted/30 px-4">
+    <main className="flex w-full flex-col items-center justify-center gap-8">
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-4">
-          <ParallaneLogo type="typo" />
-
           <div className="space-y-1">
-            <CardTitle className="text-2xl">Admin sign in</CardTitle>
+            <CardTitle className="text-2xl">Admin Login</CardTitle>
             <CardDescription>
               Sign in to access the administration panel.
             </CardDescription>
@@ -94,8 +95,13 @@ export default function page() {
               </Field>
 
               <Field className="pt-2">
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Signing in..." : "Sign in"}
+                <Button
+                  size={"lg"}
+                  type="submit"
+                  className="w-full"
+                  disabled={isPending}
+                >
+                  {isPending ? "Signing in..." : "Sign in"}
                 </Button>
               </Field>
             </FieldGroup>
