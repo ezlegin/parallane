@@ -91,3 +91,19 @@ export const enrollmentFormSchema = z.object({
 })
 
 export type EnrollmentFormType = z.infer<typeof enrollmentFormSchema>
+
+export const adminProfileFormSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Full name must be at least 2 characters.")
+    .max(100, "Full name is too long."),
+  email: z.email("Please enter a valid email address."),
+  password: z
+    .string()
+    .refine(
+      (value) => value === "" || value.length >= 8,
+      "Password must be at least 8 characters."
+    ),
+})
+
+export type AdminProfileFormType = z.infer<typeof adminProfileFormSchema>

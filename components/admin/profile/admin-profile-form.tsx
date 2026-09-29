@@ -2,13 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeOff, Loader2, Save } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { Controller, useForm } from "react-hook-form"
 
-import type { admin } from "@/lib/admin"
-
+import { createAdmin, updateAdmin } from "@/actions/admin"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -26,64 +23,26 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { adminProfileFormSchema, AdminProfileFormType } from "@/lib/formSchema"
+import { handleRes } from "@/lib/handleRes"
+import { Admin } from "@/prisma/generated/prisma/client"
 
-const adminProfileSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Full name must be at least 2 characters.")
-    .max(100, "Full name is too long."),
-
-  email: z.string().email("Please enter a valid email address."),
-
-  password: z
-    .string()
-    .refine(
-      (value) => value === "" || value.length >= 8,
-      "Password must be at least 8 characters."
-    ),
-})
-
-type AdminProfileFormValues = z.infer<typeof adminProfileSchema>
-
-type AdminProfileFormProps = {
-  admin: typeof admin
-}
-
-export function AdminProfileForm({ admin }: AdminProfileFormProps) {
-  const router = useRouter()
+export function AdminProfileForm({ admin }: { admin?: Admin | null }) {
   const [showPassword, setShowPassword] = useState(false)
 
-  const form = useForm<AdminProfileFormValues>({
-    resolver: zodResolver(adminProfileSchema),
+  const form = useForm<AdminProfileFormType>({
+    resolver: zodResolver(adminProfileFormSchema),
     defaultValues: {
-      name: admin.name,
-      email: admin.email,
+      name: admin?.fullName ?? "",
+      email: admin?.email ?? "",
       password: "",
     },
   })
 
-  async function onSubmit(values: AdminProfileFormValues) {
-    try {
-      // TODO:
-      // Connect this to your server action/API.
-      //
-      // Password must be hashed on the server before
-      // being stored in the database.
+  async function onSubmit(data: AdminProfileFormType) {
+    const res = await (admin ? updateAdmin(admin.id, data) : createAdmin(data))
 
-      console.log({
-        name: values.name,
-        email: values.email,
-        password: values.password || undefined,
-      })
-
-      // todo:
-      //   toast.success("Profile updated successfully.")
-
-      router.refresh()
-    } catch {
-      // todo:
-      //   toast.error("Failed to update profile.")
-    }
+    handleRes(res)
   }
 
   return (
@@ -99,80 +58,97 @@ export function AdminProfileForm({ admin }: AdminProfileFormProps) {
 
         <CardContent>
           <FieldGroup>
-            {/* Full name */}
-            <Field data-invalid={!!form.formState.errors.name}>
-              <FieldLabel htmlFor="name">Full name</FieldLabel>
-
-              <Input
-                id="name"
-                placeholder="Alireza Ezlegini"
-                autoComplete="name"
-                aria-invalid={!!form.formState.errors.name}
-                {...form.register("name")}
-              />
-
-              {form.formState.errors.name && (
-                <FieldError>{form.formState.errors.name.message}</FieldError>
-              )}
-            </Field>
-
-            {/* Email */}
-            <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-
-              <Input id="email" type="email" value={admin.email} />
-
-              <FieldDescription>
-                By changing your email address, you won't be able to log in with
-                this email again.
-              </FieldDescription>
-            </Field>
-
-            {/* Password */}
-            <Field data-invalid={!!form.formState.errors.password}>
-              <FieldLabel htmlFor="password">New password</FieldLabel>
-
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Leave empty to keep current password"
-                  autoComplete="new-password"
-                  className="pr-10"
-                  aria-invalid={!!form.formState.errors.password}
-                  {...form.register("password")}
-                />
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-0 right-0 size-10"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword((value) => !value)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
+            <Controller
+              name="name"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Full name</FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Alireza Ezlegini"
+                    autoComplete="name"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
                   )}
-
-                  <span className="sr-only">
-                    {showPassword ? "Hide password" : "Show password"}
-                  </span>
-                </Button>
-              </div>
-
-              <FieldDescription>
-                Leave this empty if you do not want to change your password.
-              </FieldDescription>
-
-              {form.formState.errors.password && (
-                <FieldError>
-                  {form.formState.errors.password.message}
-                </FieldError>
+                </Field>
               )}
-            </Field>
+            />
+
+            <Controller
+              name="email"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Email</FieldLabel>
+                  <Input
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="admin@parallane.com"
+                    autoComplete="email"
+                  />
+
+                  <FieldDescription>
+                    By changing your email address, you won't be able to log in
+                    with this email again.
+                  </FieldDescription>
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="password"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Password</FieldLabel>
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Leave empty to keep current password"
+                      autoComplete="new-password"
+                      className="pr-10"
+                      aria-invalid={!!form.formState.errors.password}
+                    />
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-0 right-2 size-12"
+                      tabIndex={-1}
+                      onClick={() => setShowPassword((value) => !value)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
+
+                      <span className="sr-only">
+                        {showPassword ? "Hide password" : "Show password"}
+                      </span>
+                    </Button>
+                  </div>
+
+                  <FieldDescription>
+                    Leave this empty if you do not want to change your password.
+                  </FieldDescription>
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
           </FieldGroup>
         </CardContent>
 

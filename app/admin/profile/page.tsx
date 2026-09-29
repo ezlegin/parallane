@@ -1,8 +1,9 @@
-import { AdminProfileForm } from "@/components/admin/profile/admin-profile-form"
+import { prisma } from "@/prisma/prisma"
+import { AdminProfileForm } from "../../../components/admin/profile/admin-profile-form"
 
-import { admin } from "@/lib/admin"
+const page = async () => {
+  const admin = await prisma.admin.findFirst()
 
-export default function AdminProfilePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div>
@@ -17,3 +18,5 @@ export default function AdminProfilePage() {
     </div>
   )
 }
+
+export default page
