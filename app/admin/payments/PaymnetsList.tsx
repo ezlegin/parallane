@@ -92,6 +92,7 @@ const PaymnetsList = ({
 
                 <span className="text-xs font-medium text-muted-foreground">
                   Discount
+                  {payment.discountAmount > 0 && ` -€${payment.discountAmount}`}
                 </span>
               </div>
 
@@ -120,7 +121,7 @@ const PaymnetsList = ({
                 <p className="text-xs text-muted-foreground">Total</p>
 
                 <p className="mt-1 text-sm font-medium">
-                  ${payment.totalAmount.toFixed(2)}
+                  €{payment.totalAmount.toFixed(2)}
                 </p>
               </div>
 

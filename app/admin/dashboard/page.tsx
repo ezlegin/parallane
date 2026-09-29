@@ -127,7 +127,7 @@ export default async function AdminDashboardPage() {
         />
         <StatCard
           title="Revenue"
-          value={`$${stats.monthlyRevenue.toFixed(2)}`}
+          value={`€${stats.monthlyRevenue.toFixed(2)}`}
           description="This month"
           icon={CreditCard}
         />
@@ -276,7 +276,7 @@ export default async function AdminDashboardPage() {
                     <div className="flex shrink-0 items-center gap-3">
                       <Badge variant="secondary">{p.status}</Badge>
                       <span className="text-sm font-medium">
-                        ${p.paidAmount.toLocaleString()}
+                        €{p.paidAmount.toLocaleString()}
                       </span>
                     </div>
                   </div>

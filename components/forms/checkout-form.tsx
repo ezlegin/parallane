@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "../ui/toast"
+import { membershipPrice } from "@/lib/membership"
 
 const checkoutSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required."),
@@ -69,27 +70,19 @@ type CheckoutFormProps = {
 const plans = {
   monthly: {
     name: "Monthly Membership",
-    price: 29,
+    price: membershipPrice.monthly,
     billing: "Billed monthly",
     description: "Flexible monthly access",
   },
   annual: {
     name: "Annual Membership",
-    price: 228,
+    price: membershipPrice.annual,
     billing: "Billed annually",
     description: "12 months of uninterrupted learning",
   },
 }
 
 const paymentMethods = ["VISA", "Mastercard", "AMEX", "PayPal"]
-
-function formatPrice(price: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(price)
-}
 
 function FormField({
   label,
@@ -483,7 +476,9 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                     </p>
 
                     <p className="mt-2 text-sm font-medium">
-                      {plan === "annual" ? "$19/month equivalent" : "$29/month"}
+                      {plan === "annual"
+                        ? `€${membershipPrice.annual / 12}/month equivalent`
+                        : `€${membershipPrice.monthly}/month`}
                     </p>
                   </div>
                 </div>
@@ -551,9 +546,7 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-muted-foreground">Membership</span>
 
-                    <span className="font-medium">
-                      {formatPrice(selectedPlan.price)}
-                    </span>
+                    <span className="font-medium">€{selectedPlan.price}</span>
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
@@ -565,7 +558,7 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-muted-foreground">Taxes</span>
 
-                    <span className="text-muted-foreground">$0</span>
+                    <span className="text-muted-foreground">€0</span>
                   </div>
                 </div>
 
@@ -576,7 +569,7 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                     <span className="font-semibold">Total</span>
 
                     <span className="text-3xl font-bold tracking-tight">
-                      {formatPrice(selectedPlan.price)}
+                      €{selectedPlan.price}
                     </span>
                   </div>
 
@@ -592,13 +585,15 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                       <BadgeCheck className="size-5 text-green-500" />
 
                       <p className="text-sm font-semibold">
-                        Save $120 per year
+                        Save €
+                        {membershipPrice.monthly * 12 - membershipPrice.annual}{" "}
+                        per year
                       </p>
                     </div>
 
                     <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      Pay $228 for 12 months instead of $348 when paying
-                      monthly.
+                      Pay €{membershipPrice.annual} for 12 months instead of €
+                      {membershipPrice.monthly * 12} when paying monthly.
                     </p>
                   </div>
                 )}

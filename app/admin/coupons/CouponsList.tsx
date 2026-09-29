@@ -133,5 +133,5 @@ const CouponsList = ({ coupons }: { coupons: Coupon[] }) => {
 export default CouponsList
 
 function formatDiscount(couponType: DiscountType, amount: number) {
-  return couponType === "percentage" ? `${amount}%` : `$${amount}`
+  return couponType === "percentage" ? `${amount}%` : `€${amount}`
 }

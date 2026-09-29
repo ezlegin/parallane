@@ -8,6 +8,7 @@ import { Card } from "./ui/card"
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group"
 import { useState } from "react"
 import Link from "next/link"
+import { membershipPrice } from "@/lib/membership"
 
 const MembershipCard = () => {
   const [period, setPeriod] = useState<"monthly" | "annual">("monthly")
@@ -84,7 +85,10 @@ const MembershipCard = () => {
               {/* Price */}
               <div className="flex items-end gap-3">
                 <span className="text-6xl font-semibold tracking-tight">
-                  ${isAnnual ? "19" : "29"}
+                  €
+                  {isAnnual
+                    ? membershipPrice.annual / 12
+                    : membershipPrice.monthly}
                 </span>
 
                 <span className="mb-2 text-muted-foreground">/ month</span>
@@ -95,17 +99,21 @@ const MembershipCard = () => {
                   <p className="mt-2 space-x-2 text-sm text-muted-foreground">
                     Billed annually at{" "}
                     <strong className="text-lg text-foreground">
-                      $228/year.
+                      €{membershipPrice.annual}/year.
                     </strong>
                     <Badge className="font-semibold" variant={"success"}>
-                      Save $120.
+                      Save €
+                      {membershipPrice.monthly * 12 - membershipPrice.annual}.
                     </Badge>
                   </p>
                 </div>
               ) : (
                 <p className="mt-2 text-sm text-muted-foreground">
                   Billed monthly at{" "}
-                  <strong className="text-foreground">$19/month</strong>.
+                  <strong className="text-foreground">
+                    €{membershipPrice.monthly}/month
+                  </strong>
+                  .
                 </p>
               )}
 
