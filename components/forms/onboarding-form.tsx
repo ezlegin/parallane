@@ -28,8 +28,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
+import { setOnboarding } from "@/actions/student"
+import { handleRes } from "@/lib/handleRes"
 import { cn } from "@/lib/utils"
-import { toast } from "../ui/toast"
 
 type CountryOnboardingFormProps = {
   firstName: string
@@ -46,6 +47,8 @@ const formattedCountries = Object.keys(countries)
 export function CountryOnboardingForm({
   firstName,
 }: CountryOnboardingFormProps) {
+  const sessionUserId = "22" //todo
+
   const [selectedCountry, setSelectedCountry] = useState("US")
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition() //todo: use transition.
@@ -58,9 +61,12 @@ export function CountryOnboardingForm({
     [selectedCountry]
   )
 
-  function handleContinue() {
-    console.log(selectedCountry)
-    toast.add({ title: "country saved." })
+  function onSubmit() {
+    startTransition(async () => {
+      handleRes(
+        await setOnboarding(sessionUserId, { country: selectedCountry })
+      )
+    })
   }
 
   const listRef = useRef<HTMLDivElement>(null)
@@ -187,7 +193,7 @@ export function CountryOnboardingForm({
           <CardFooter className="flex flex-col gap-4 border-t bg-muted/10 px-6 sm:px-10">
             <Button
               type="button"
-              onClick={handleContinue}
+              onClick={onSubmit}
               disabled={!selectedCountry || isPending}
               className="h-12 w-full rounded-xl text-sm font-semibold"
             >

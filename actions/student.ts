@@ -100,3 +100,24 @@ export async function deleteStudent(id: string) {
     return { error: (error as Error).message }
   }
 }
+
+export async function setOnboarding(userId: string, data: { country: string }) {
+  const { country } = data
+
+  try {
+    const user = await prisma.user.findFirst({ where: { id: userId } })
+    if (!user) return { error: "User not found. Please sign in again." }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        country,
+      },
+    })
+
+    return { success: "Data updated successfully." }
+  } catch (error) {
+    console.error(error)
+    return { error: (error as Error).message }
+  }
+}

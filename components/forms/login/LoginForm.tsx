@@ -1,19 +1,21 @@
 "use client"
 
-import { toast } from "@/components/ui/toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import * as z from "zod"
 
+import { createStudent } from "@/actions/student"
 import GlowingStroke from "@/components/GlowingStroke"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { handleRes } from "@/lib/handleRes"
 import { googleLogo } from "@/public"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 const formSchema = z.object({
@@ -22,10 +24,13 @@ const formSchema = z.object({
   password: z.string().min(8, "at least 8 characters."),
 })
 
+type FormType = z.infer<typeof formSchema>
+
 export default function LoginForm() {
+  const router = useRouter()
   const [isSignUp, setIsSignUp] = useState(false)
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
@@ -34,9 +39,11 @@ export default function LoginForm() {
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data)
-    toast.add({ title: "Form Was Submitted." })
+  async function onSubmit(data: FormType) {
+    if (isSignUp) {
+      const res = await createStudent(data as Required<FormType>)
+      handleRes(res, { onSuccess: () => router.push("/login/onboarding") })
+    }
   }
 
   return (
@@ -85,9 +92,6 @@ export default function LoginForm() {
                       aria-invalid={fieldState.invalid}
                       label="Email Address"
                     />
-                    {/* {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )} */}
                   </Field>
                 )}
               />
@@ -103,16 +107,13 @@ export default function LoginForm() {
                       aria-invalid={fieldState.invalid}
                       label="Password"
                     />
-                    {/* {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )} */}
                   </Field>
                 )}
               />
 
               {!isSignUp && (
                 <Link
-                  href={"/login/forgotpassword"}
+                  href={"/login/forgot-password"}
                   className="text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
                 >
                   Forgot password?
