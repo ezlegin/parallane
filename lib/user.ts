@@ -1,5 +1,6 @@
 "use server"
 
+import { auth } from "@/auth"
 import { prisma } from "@/prisma/prisma"
 
 export async function searchUsers(query: string) {
@@ -25,4 +26,27 @@ export async function searchUsers(query: string) {
   } catch (error) {
     return { error: (error as Error).message }
   }
+}
+
+export const getSessionUser = async () => {
+  const session = await auth()
+
+  if (!session || !session.user) return null
+
+  return await prisma.user.findFirst({
+    where: { id: session.user.id },
+    omit: { password: true },
+  })
+}
+
+export const getActiveMembership = async (userId?: string) => {
+  if (!userId) return null
+
+  return await prisma.membership.findFirst({
+    where: {
+      userId,
+      expiresAt: { gte: new Date() },
+      status: "active",
+    },
+  })
 }

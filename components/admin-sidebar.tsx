@@ -27,11 +27,16 @@ import {
 
 import { usePathname } from "next/navigation"
 
+import { handleAdminLogout } from "@/actions/admin"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { SidebarSeparator } from "@/components/ui/sidebar"
-import { handleAdminLogout } from "@/actions/admin"
+import { getInitials } from "@/lib/getInitials"
 
-export function AdminSidebar() {
+export function AdminSidebar({
+  sessionUser: user,
+}: {
+  sessionUser: { fullName: string; email: string } | null
+}) {
   const pathname = usePathname()
 
   return (
@@ -113,15 +118,15 @@ export function AdminSidebar() {
         <div className="flex items-center gap-3 px-2 py-3">
           <Avatar className="h-9 w-9 rounded-lg">
             <AvatarFallback className="rounded-lg">
-              {getInitials(user.name)}
+              {getInitials(user?.fullName)}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{user.name}</p>
+            <p className="truncate text-sm font-medium">{user?.fullName}</p>
 
             <p className="truncate text-xs text-muted-foreground">
-              {user.email}
+              {user?.email}
             </p>
           </div>
         </div>
@@ -142,21 +147,7 @@ export function AdminSidebar() {
   )
 }
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase()
-}
-
 export default AdminSidebar
-
-const user = {
-  name: "Alireza Ezlegini",
-  email: "ezlegini.ir@gmail.com",
-}
 
 const navigation = [
   {

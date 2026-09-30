@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import "./globals.css"
+import ProgressBarProvider from "@/components/ProgressBarProvider"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -30,7 +31,7 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          {children}
+          <ProgressBarProvider>{children}</ProgressBarProvider>
           <Toaster />
         </ThemeProvider>
       </body>

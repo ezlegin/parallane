@@ -1,15 +1,21 @@
+import { getActiveMembership, getSessionUser } from "@/lib/user"
 import Link from "next/link"
 import ParallaneLogo from "./ParallaneLogo"
 import { Button } from "./ui/button"
 import { Card } from "./ui/card"
 
-const Navbar = () => {
+const Navbar = async () => {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/pricing", label: "Pricing" },
     { href: "/contact", label: "Contact" },
     { href: "/roadmaps", label: "Roadmaps" },
   ]
+
+  const sessionUser = await getSessionUser()
+  const activeMembership = await getActiveMembership(sessionUser?.id)
+
+  console.log(activeMembership)
 
   return (
     <div className="px-3">
@@ -33,13 +39,15 @@ const Navbar = () => {
 
         <div className="flex gap-2">
           <Link href={"/login"}>
-            <Button size={"lg"} variant={"ghost"}>
-              Sign In
+            <Button size={"lg"} variant={sessionUser ? "outline" : "ghost"}>
+              {sessionUser ? sessionUser.fullName : "Sign In"}
             </Button>
           </Link>
-          <Link href={"/login?signup=true"}>
-            <Button size={"lg"}>Get Started</Button>
-          </Link>
+          {!activeMembership && (
+            <Link href={"/pricing"}>
+              <Button size={"lg"}>Get Started</Button>
+            </Link>
+          )}
         </div>
       </Card>
     </div>

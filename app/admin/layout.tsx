@@ -5,15 +5,18 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { getSessionUser } from "@/lib/user"
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const sessionUser = await getSessionUser()
+
   return (
     <SidebarProvider>
-      <AdminSidebar />
+      <AdminSidebar sessionUser={sessionUser} />
 
       <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 border-b">

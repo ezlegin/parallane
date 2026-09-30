@@ -1,16 +1,6 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import {
-  BookOpen,
-  CreditCard,
-  LayoutDashboard,
-  LogOut,
-  UserRound,
-  Crown,
-} from "lucide-react"
-
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Sidebar,
   SidebarContent,
@@ -24,36 +14,18 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { getInitials } from "@/lib/getInitials"
+import {
+  BookOpen,
+  CreditCard,
+  Crown,
+  LayoutDashboard,
+  LogOut,
+  UserRound,
+} from "lucide-react"
 import { signOut } from "next-auth/react"
-
-const user = {
-  name: "Alex Morgan",
-  email: "alex@example.com",
-}
-
-const navigation = [
-  {
-    title: "Dashboard",
-    href: "/panel",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "My Courses",
-    href: "/panel/courses",
-    icon: BookOpen,
-  },
-  {
-    title: "Membership",
-    href: "/panel/membership",
-    icon: Crown,
-  },
-  {
-    title: "Payments",
-    href: "/panel/payments",
-    icon: CreditCard,
-  },
-]
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 const accountNavigation = [
   {
@@ -63,7 +35,11 @@ const accountNavigation = [
   },
 ]
 
-export function PanelSidebar() {
+export function PanelSidebar({
+  sessionUser: user,
+}: {
+  sessionUser: { fullName: string; email: string } | null
+}) {
   const pathname = usePathname()
 
   return (
@@ -143,15 +119,15 @@ export function PanelSidebar() {
         <div className="flex items-center gap-3 px-2 py-3">
           <Avatar className="h-9 w-9 rounded-lg">
             <AvatarFallback className="rounded-lg">
-              {getInitials(user.name)}
+              {getInitials(user?.fullName)}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{user.name}</p>
+            <p className="truncate text-sm font-medium">{user?.fullName}</p>
 
             <p className="truncate text-xs text-muted-foreground">
-              {user.email}
+              {user?.email}
             </p>
           </div>
         </div>
@@ -169,17 +145,31 @@ export function PanelSidebar() {
   )
 }
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase()
-}
-
 async function handleLogout() {
   await signOut({
     redirectTo: "/login",
   })
 }
+
+const navigation = [
+  {
+    title: "Dashboard",
+    href: "/panel",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "My Courses",
+    href: "/panel/courses",
+    icon: BookOpen,
+  },
+  {
+    title: "Membership",
+    href: "/panel/membership",
+    icon: Crown,
+  },
+  {
+    title: "Payments",
+    href: "/panel/payments",
+    icon: CreditCard,
+  },
+]
