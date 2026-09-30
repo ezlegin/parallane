@@ -1,5 +1,6 @@
 "use server"
 
+import { adminSignOut } from "@/admin-auth"
 import { AdminProfileFormType } from "@/lib/formSchema"
 import { prisma } from "@/prisma/prisma"
 import bcrypt from "bcrypt"
@@ -87,4 +88,10 @@ export async function updateAdmin(id: string, values: AdminProfileFormType) {
     console.error("[updateAdmin]", err)
     return { error: "Failed to update profile. Try again." }
   }
+}
+
+export async function handleAdminLogout() {
+  await adminSignOut({
+    redirectTo: "/login/admin",
+  })
 }

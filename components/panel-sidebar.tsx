@@ -25,6 +25,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { signOut } from "next-auth/react"
 
 const user = {
   name: "Alex Morgan",
@@ -178,10 +179,7 @@ function getInitials(name: string) {
 }
 
 async function handleLogout() {
-  // Replace this with your authentication logout function.
-  // Example:
-  //
-  // await signOut({
-  //   redirectTo: "/login",
-  // })
+  await signOut({
+    redirectTo: "/login",
+  })
 }

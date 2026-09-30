@@ -29,6 +29,7 @@ import { usePathname } from "next/navigation"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { SidebarSeparator } from "@/components/ui/sidebar"
+import { handleAdminLogout } from "@/actions/admin"
 
 export function AdminSidebar() {
   const pathname = usePathname()
@@ -127,7 +128,10 @@ export function AdminSidebar() {
 
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
+            <SidebarMenuButton
+              onClick={async () => await handleAdminLogout()}
+              tooltip="Logout"
+            >
               <LogOut />
               <span>Logout</span>
             </SidebarMenuButton>
@@ -145,15 +149,6 @@ function getInitials(name: string) {
     .join("")
     .slice(0, 2)
     .toUpperCase()
-}
-
-async function handleLogout() {
-  // Replace this with your authentication logout function.
-  // Example:
-  //
-  // await signOut({
-  //   redirectTo: "/login",
-  // })
 }
 
 export default AdminSidebar

@@ -5,6 +5,24 @@ import Credentials from "next-auth/providers/credentials"
 import { prisma } from "./prisma/prisma"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  callbacks: {
+    authorized: async ({ request: req, auth }) => {
+      const privateRoutes = ["/panel", "/checkout", "/onboarding", "/classroom"]
+      const isLoginRoute = req.nextUrl.pathname.startsWith("/login")
+      const isPrivateRoute = privateRoutes.some((route) =>
+        req.nextUrl.pathname.startsWith(route)
+      )
+
+      if (!!auth) {
+        if (isLoginRoute)
+          return Response.redirect(new URL("/panel", req.nextUrl.origin))
+        return true
+      } else {
+        if (isPrivateRoute && !isLoginRoute) return false
+        return true
+      }
+    },
+  },
   basePath: "/api/auth",
   cookies: {
     sessionToken: {

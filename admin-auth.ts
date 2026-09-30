@@ -9,6 +9,26 @@ export const {
   signOut: adminSignOut,
   auth: adminAuth,
 } = NextAuth({
+  callbacks: {
+    authorized: async ({ request: req, auth }) => {
+      const privateRoutes = ["/admin"]
+      const isLoginRoute = req.nextUrl.pathname.startsWith("/login/admin")
+      const isPrivateRoute = privateRoutes.some((route) =>
+        req.nextUrl.pathname.startsWith(route)
+      )
+
+      if (!!auth) {
+        if (isLoginRoute)
+          return Response.redirect(
+            new URL("/admin/dashboard", req.nextUrl.origin)
+          )
+        return true
+      } else {
+        if (isPrivateRoute && !isLoginRoute) return false
+        return true
+      }
+    },
+  },
   basePath: "/api/admin-auth",
   cookies: {
     sessionToken: {
@@ -16,7 +36,7 @@ export const {
     },
   },
   pages: {
-    signIn: "/login/admin",
+    signIn: "/admin/login",
     error: "/auth/error",
   },
   session: { strategy: "jwt" },

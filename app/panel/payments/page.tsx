@@ -2,6 +2,7 @@ import { CheckCircle2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { auth } from "@/auth"
 
 const payments = [
   {
@@ -24,7 +25,10 @@ const payments = [
   },
 ]
 
-export default function PaymentsPage() {
+export default async function PaymentsPage() {
+  const session = await auth()
+  console.log("session", session)
+
   return (
     <div className="space-y-8">
       <section>

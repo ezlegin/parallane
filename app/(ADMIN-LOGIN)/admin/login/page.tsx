@@ -50,7 +50,7 @@ export default function page() {
   }
 
   return (
-    <main className="flex w-full flex-col items-center justify-center gap-8">
+    <main className="flex h-screen w-full flex-col items-center justify-center gap-8">
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-4">
           <div className="space-y-1">

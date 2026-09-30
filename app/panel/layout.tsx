@@ -1,14 +1,19 @@
 import type { ReactNode } from "react"
 
 import { PanelSidebar } from "@/components/panel-sidebar"
+import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
+import { SessionProvider } from "next-auth/react"
 
-export default function PanelLayout({ children }: { children: ReactNode }) {
+export default async function PanelLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
   return (
     <SidebarProvider>
       <PanelSidebar />
@@ -24,7 +29,7 @@ export default function PanelLayout({ children }: { children: ReactNode }) {
 
         <main className="flex-1">
           <div className="mx-auto w-full max-w-7xl p-4 md:p-6 lg:p-8">
-            {children}
+            <SessionProvider>{children}</SessionProvider>
           </div>
         </main>
       </SidebarInset>
