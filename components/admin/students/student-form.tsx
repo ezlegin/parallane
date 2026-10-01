@@ -33,7 +33,7 @@ export function StudentForm({ student }: { student?: Omit<User, "password"> }) {
   const form = useForm<StudentFormTypes>({
     resolver: zodResolver(studentFormSchema),
     defaultValues: {
-      fullName: student?.fullName ?? "",
+      fullName: student?.name ?? "",
       email: student?.email ?? "",
       password: "",
     },

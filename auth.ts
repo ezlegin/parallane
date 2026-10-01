@@ -3,8 +3,10 @@ import bcrypt from "bcrypt"
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { prisma } from "./prisma/prisma"
+import Google from "next-auth/providers/google"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true, //todo
   callbacks: {
     authorized: async ({ request: req, auth }) => {
       const privateRoutes = ["/panel", "/checkout", "/onboarding", "/classroom"]
@@ -36,6 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
   adapter: PrismaAdapter(prisma),
   providers: [
+    Google({ allowDangerousEmailAccountLinking: true }),
     Credentials({
       id: "user-login",
       name: "User Login",
@@ -52,7 +55,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const ok = await bcrypt.compare(password, user.password)
         if (!ok) throw new Error("Invalid Credentials.")
 
-        return { id: user.id, email: user.email, name: user.fullName }
+        return { id: user.id, email: user.email, name: user.name }
       },
     }),
   ],

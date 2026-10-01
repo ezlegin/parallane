@@ -21,14 +21,14 @@ export default function ContactResponseForm({
   contact: Contact & { user: Omit<User, "password"> | null }
 }) {
   const user = contact.user ?? {
-    fullName: contact.fullName,
+    name: contact.fullName,
     email: contact.email,
   }
 
   const form = useForm<ContactResponseFormType>({
     resolver: zodResolver(contactResponseFormSchema),
     defaultValues: {
-      message: contact.responseMessage ?? `Hi dear ${user.fullName},`,
+      message: contact.responseMessage ?? `Hi dear ${user.name},`,
     },
   })
 

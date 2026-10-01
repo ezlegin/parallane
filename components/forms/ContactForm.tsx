@@ -23,7 +23,7 @@ export default function ContactForm({
   const form = useForm<ContactFormType>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
-      fullName: user?.fullName ?? "",
+      fullName: user?.name ?? "",
       email: user?.email ?? "",
       subject: "",
       message: "",

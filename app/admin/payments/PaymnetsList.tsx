@@ -42,7 +42,7 @@ const PaymnetsList = ({
 
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">
-                    {payment.user.fullName}
+                    {payment.user.name}
                   </p>
 
                   <p className="truncate text-xs text-muted-foreground">

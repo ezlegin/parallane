@@ -38,7 +38,7 @@ const accountNavigation = [
 export function PanelSidebar({
   sessionUser: user,
 }: {
-  sessionUser: { fullName: string; email: string } | null
+  sessionUser: { name: string; email: string } | null
 }) {
   const pathname = usePathname()
 
@@ -119,12 +119,12 @@ export function PanelSidebar({
         <div className="flex items-center gap-3 px-2 py-3">
           <Avatar className="h-9 w-9 rounded-lg">
             <AvatarFallback className="rounded-lg">
-              {getInitials(user?.fullName)}
+              {getInitials(user?.name)}
             </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{user?.fullName}</p>
+            <p className="truncate text-sm font-medium">{user?.name}</p>
 
             <p className="truncate text-xs text-muted-foreground">
               {user?.email}

@@ -20,7 +20,7 @@ function ContactList({
   isLast: boolean
 }) {
   const user = contact.user ?? {
-    fullName: contact.fullName,
+    name: contact.fullName,
     email: contact.email,
   }
 
@@ -36,7 +36,7 @@ function ContactList({
 
       <div className="min-w-0">
         <div className="flex flex-col">
-          <span className="truncate text-sm font-medium">{user.fullName}</span>
+          <span className="truncate text-sm font-medium">{user.name}</span>
 
           <span className="hidden text-xs text-muted-foreground sm:inline">
             {user.email}

@@ -38,7 +38,7 @@ function QAList({
       <div className="min-w-0 flex-1">
         <div className="flex flex-col">
           <span className="truncate text-sm font-medium">
-            {conversation.user.fullName}
+            {conversation.user.name}
           </span>
 
           <span className="hidden text-xs text-muted-foreground sm:inline">

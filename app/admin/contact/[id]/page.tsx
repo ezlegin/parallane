@@ -30,7 +30,7 @@ export default async function QAChatPage({
   }
 
   const user = contact.user ?? {
-    fullName: contact.fullName,
+    name: contact.fullName,
     email: contact.email,
   }
 
@@ -45,7 +45,7 @@ export default async function QAChatPage({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="truncate text-xl font-semibold">{user.fullName}</h1>
+            <h1 className="truncate text-xl font-semibold">{user.name}</h1>
 
             <Badge
               variant={getStatusVariant(contact.status)}
@@ -83,7 +83,7 @@ export default async function QAChatPage({
         <CardContent>
           <div className="mb-3 rounded-md border p-4">
             <span className="text-xs text-muted-foreground">
-              {user.fullName} | {format(contact.createdAt, "Pp")}
+              {user.name} | {format(contact.createdAt, "Pp")}
             </span>
             <p>{contact.message}</p>
           </div>

@@ -74,12 +74,12 @@ export default function StudentsList({ students }: { students: UserType[] }) {
                     className="flex min-w-0 flex-1 items-center gap-3"
                   >
                     <div className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-xs font-medium">
-                      {getInitials(student.fullName)}
+                      {getInitials(student.name)}
                     </div>
 
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">
-                        {student.fullName}
+                        {student.name}
                       </p>
 
                       <p className="truncate text-sm text-muted-foreground">

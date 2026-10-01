@@ -23,7 +23,7 @@ import { searchUsers } from "@/lib/user"
 type UserOption = {
   id: string
   email: string
-  fullName: string
+  name: string
 }
 
 function UserCombobox({
@@ -83,7 +83,7 @@ function UserCombobox({
           >
             {selectedUser ? (
               <span className="truncate">
-                {selectedUser.fullName}{" "}
+                {selectedUser.name}{" "}
                 <span className="text-muted-foreground">
                   {selectedUser.email}
                 </span>
@@ -141,7 +141,7 @@ function UserCombobox({
                         <p className="truncate text-sm">{user.email}</p>
 
                         <p className="truncate text-xs text-muted-foreground">
-                          {user.fullName}
+                          {user.name}
                         </p>
                       </div>
                     </CommandItem>

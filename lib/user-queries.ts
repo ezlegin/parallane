@@ -53,25 +53,6 @@ export async function getContinueLearning(userId: string, limit = 3) {
     },
   })
 
-  // For each course, count completed lessons for this user
-  const courseIds = enrollments.map((e) => e.course.id)
-
-  const lessonTotals = await prisma.lesson.groupBy({
-    by: ["seasonId"],
-    where: { season: { courseId: { in: courseIds } } },
-    _count: { _all: true },
-  })
-
-  const completedLessons = await prisma.lessonProgress.groupBy({
-    by: ["lessonId"],
-    where: {
-      userId,
-      completed: true, // adjust field name
-      lesson: { season: { courseId: { in: courseIds } } },
-    },
-    _count: { _all: true },
-  })
-
   // --- Simplify: fetch everything per course in one pass
   const results = await Promise.all(
     enrollments.map(async (enrollment) => {

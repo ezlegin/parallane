@@ -49,7 +49,7 @@ function EnrollmentCard({
 
             <div className="min-w-0">
               <CardTitle className="truncate text-base">
-                {enrollment.user.fullName}
+                {enrollment.user.name}
               </CardTitle>
 
               <p className="truncate text-sm text-muted-foreground">

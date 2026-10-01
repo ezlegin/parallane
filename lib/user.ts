@@ -14,7 +14,7 @@ export async function searchUsers(query: string) {
       select: {
         id: true,
         email: true,
-        fullName: true,
+        name: true,
       },
       take: 6,
       orderBy: {

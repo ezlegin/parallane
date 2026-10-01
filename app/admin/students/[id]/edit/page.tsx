@@ -41,7 +41,7 @@ export default async function EditStudentPage({
           </h1>
 
           <p className="text-sm text-muted-foreground">
-            Update {student.fullName}&apos;s account information.
+            Update {student.name}&apos;s account information.
           </p>
         </div>
       </div>

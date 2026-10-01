@@ -61,7 +61,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <section>
         <p className="text-sm text-muted-foreground">Dashboard</p>
-        <Greeting name={user.fullName} />
+        <Greeting name={user.name} />
         <p className="mt-2 text-muted-foreground">
           Continue learning and keep building your skills.
         </p>

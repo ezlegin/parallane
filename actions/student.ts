@@ -22,7 +22,7 @@ export async function createStudent(data: StudentFormTypes) {
 
     await prisma.user.create({
       data: {
-        fullName,
+        name: fullName,
         email,
         password: hashedPassword,
       },
@@ -66,7 +66,7 @@ export async function updateStudent(id: string, data: StudentFormTypes) {
     await prisma.user.update({
       where: { id },
       data: {
-        fullName,
+        name: fullName,
         email,
         password: password ? hashedPassword : undefined,
       },
@@ -112,6 +112,7 @@ export async function setOnboarding(userId: string, data: { country: string }) {
     await prisma.user.update({
       where: { id: userId },
       data: {
+        isOnboardingCompleted: true,
         country,
       },
     })
@@ -132,7 +133,7 @@ export async function updateUserProfile(data: { fullName: string }) {
 
     await prisma.user.update({
       where: { email: session.user.email },
-      data: { fullName: data.fullName },
+      data: { name: data.fullName },
     })
 
     revalidatePath("/panel/profile")

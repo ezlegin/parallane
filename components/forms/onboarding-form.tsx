@@ -2,9 +2,7 @@
 
 import { countries } from "countries-list"
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
-
 import { ArrowRight, Check, ChevronsUpDown, Globe2 } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -27,13 +25,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-
 import { setOnboarding } from "@/actions/student"
 import { handleRes } from "@/lib/handleRes"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
-type CountryOnboardingFormProps = {
+type Props = {
   firstName: string
+  userId: string
 }
 
 const formattedCountries = Object.keys(countries)
@@ -44,11 +43,8 @@ const formattedCountries = Object.keys(countries)
   }))
   .sort((a, b) => a.label.localeCompare(b.label))
 
-export function CountryOnboardingForm({
-  firstName,
-}: CountryOnboardingFormProps) {
-  const sessionUserId = "22" //todo
-
+export function CountryOnboardingForm({ firstName, userId }: Props) {
+  const router = useRouter()
   const [selectedCountry, setSelectedCountry] = useState("US")
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition() //todo: use transition.
@@ -63,9 +59,9 @@ export function CountryOnboardingForm({
 
   function onSubmit() {
     startTransition(async () => {
-      handleRes(
-        await setOnboarding(sessionUserId, { country: selectedCountry })
-      )
+      handleRes(await setOnboarding(userId, { country: selectedCountry }), {
+        onSuccess: () => router.push("/panel"),
+      })
     })
   }
 

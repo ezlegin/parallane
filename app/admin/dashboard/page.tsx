@@ -160,9 +160,7 @@ export default async function AdminDashboardPage() {
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
-                          <p className="text-sm font-medium">
-                            {q.user.fullName}
-                          </p>
+                          <p className="text-sm font-medium">{q.user.name}</p>
                           <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
                             {lastMessage?.content ?? "No messages yet"}
                           </p>
@@ -234,7 +232,7 @@ export default async function AdminDashboardPage() {
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">
-                        {e.user.fullName}
+                        {e.user.name}
                       </p>
                       <p className="truncate text-xs text-muted-foreground">
                         {e.user.email}
@@ -266,7 +264,7 @@ export default async function AdminDashboardPage() {
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">
-                        {p.user.fullName}
+                        {p.user.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {p.discountType ?? "No discount"} ·{" "}

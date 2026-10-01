@@ -58,7 +58,7 @@ export default function MembershipCard({
 
             <div className="min-w-0">
               <CardTitle className="truncate text-base">
-                {membership.user.fullName}
+                {membership.user.name}
               </CardTitle>
 
               <p className="truncate text-sm text-muted-foreground">

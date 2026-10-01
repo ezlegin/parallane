@@ -5,14 +5,14 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { getSessionUser } from "@/lib/user"
+import { getSessionAdmin } from "@/lib/admin"
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const sessionUser = await getSessionUser()
+  const sessionUser = await getSessionAdmin()
 
   return (
     <SidebarProvider>

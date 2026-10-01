@@ -99,7 +99,7 @@ export function Curriculum({ form }: Props) {
 }
 
 type SeasonFieldProps = {
-  form: UseFormReturn<CourseFormValues>
+  form: UseFormReturn<CourseFormType>
   seasonIndex: number
   onRemove: () => void
 }
@@ -168,7 +168,7 @@ function SeasonField({ form, seasonIndex, onRemove }: SeasonFieldProps) {
               url: "",
               type: "video",
               isFree: false,
-              duration: 0,
+              duration: "0",
             })
           }
         >
@@ -181,7 +181,7 @@ function SeasonField({ form, seasonIndex, onRemove }: SeasonFieldProps) {
 }
 
 type LessonFieldProps = {
-  form: UseFormReturn<CourseFormValues>
+  form: UseFormReturn<CourseFormType>
   seasonIndex: number
   lessonIndex: number
   onRemove: () => void

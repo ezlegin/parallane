@@ -43,7 +43,7 @@ export async function getPendingQuestions(limit = 5) {
     orderBy: { updatedAt: "desc" },
     take: limit,
     include: {
-      user: { select: { fullName: true } },
+      user: { select: { name: true } },
       course: { select: { title: true } },
       messages: {
         orderBy: { createdAt: "desc" },
@@ -80,7 +80,7 @@ export async function getRecentEnrollments(limit = 5) {
     orderBy: { enrolledAt: "desc" },
     take: limit,
     include: {
-      user: { select: { fullName: true, email: true } },
+      user: { select: { name: true, email: true } },
       course: { select: { title: true } },
     },
   })
@@ -91,7 +91,7 @@ export async function getRecentPayments(limit = 5) {
     orderBy: { createdAt: "desc" },
     take: limit,
     include: {
-      user: { select: { fullName: true } },
+      user: { select: { name: true } },
     },
   })
 }

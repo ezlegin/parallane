@@ -55,7 +55,7 @@ export default async function StudentPage({ params }: Props) {
 
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              {student.fullName}
+              {student.name}
             </h1>
             <p className="text-sm text-muted-foreground">Student profile</p>
           </div>
@@ -72,10 +72,10 @@ export default async function StudentPage({ params }: Props) {
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center">
               <div className="flex size-20 items-center justify-center rounded-full border bg-muted text-lg font-medium">
-                {getInitials(student.fullName)}
+                {getInitials(student.name)}
               </div>
 
-              <h2 className="mt-4 font-semibold">{student.fullName}</h2>
+              <h2 className="mt-4 font-semibold">{student.name}</h2>
 
               <p className="mt-1 text-sm text-muted-foreground">
                 {student.email}

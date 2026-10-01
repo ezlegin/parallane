@@ -46,7 +46,7 @@ export default async function QAChatPage({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
             <h1 className="truncate text-xl font-semibold">
-              {conversation.user.fullName}
+              {conversation.user.name}
             </h1>
 
             <Badge
@@ -83,7 +83,7 @@ export default async function QAChatPage({
 
         <MessagesList
           messages={conversation.messages}
-          userFullName={conversation.user.fullName}
+          userFullName={conversation.user.name}
         />
 
         <Separator />
@@ -91,7 +91,7 @@ export default async function QAChatPage({
         <CardFooter className="block p-4">
           <ConversationMessageForm
             conversationId={conversation.id}
-            studentName={conversation.user.fullName}
+            studentName={conversation.user.name}
           />
         </CardFooter>
       </Card>

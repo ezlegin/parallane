@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { signIn } from "next-auth/react"
 import { toast } from "@/components/ui/toast"
+import { GoogleOAuthSignIn } from "@/actions/OAuth"
 
 const formSchema = z.object({
   fullName: z.string().optional(),
@@ -71,7 +72,7 @@ export default function LoginForm() {
 
   const onGoogleLogin = () => {
     startTransition(async () => {
-      console.log("loged in by google.")
+      await GoogleOAuthSignIn()
     })
   }
 

@@ -16,7 +16,7 @@ export const createContact = async (data: ContactFormType, userId?: string) => {
         message,
         subject,
         email: user?.email ?? email,
-        fullName: user?.fullName ?? fullName,
+        fullName: user?.name ?? fullName,
         userId: user?.id,
       },
     })

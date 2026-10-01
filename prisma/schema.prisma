@@ -79,15 +79,17 @@ model Admin {
 }
 
 model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  password String
+  id       String  @id @default(cuid())
+  email    String  @unique
+  password String?
 
-  fullName    String
-  address     String?
-  city        String?
-  postalCode  String?
-  phoneNumber String?
+  name          String
+  address       String?
+  city          String?
+  postalCode    String?
+  phoneNumber   String?
+  emailVerified DateTime?
+  image         String?
 
   isOnboardingCompleted Boolean @default(false)
   country               String?
@@ -108,8 +110,30 @@ model User {
   couponUsages        CouponUsage[]
   passwordResetTokens PasswordResetToken[]
   contacts            Contact[]
+  accounts            Account[]
 
   @@index([createdAt])
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
 model Contact {

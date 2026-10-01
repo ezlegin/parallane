@@ -21,7 +21,7 @@ export default async function ProfilePage() {
 
       <UserProfileForm
         user={{
-          fullName: user.fullName,
+          fullName: user.name,
           email: user.email,
         }}
       />

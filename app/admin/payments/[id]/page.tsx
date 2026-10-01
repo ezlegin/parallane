@@ -31,7 +31,7 @@ export default async function AdminPaymentPage({ params }: Props) {
         </h1>
 
         <p className="mt-1 text-sm text-muted-foreground">
-          {payment.user.fullName} · {payment.user.email}
+          {payment.user.name} · {payment.user.email}
         </p>
       </div>
 

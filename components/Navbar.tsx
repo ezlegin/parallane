@@ -15,8 +15,6 @@ const Navbar = async () => {
   const sessionUser = await getSessionUser()
   const activeMembership = await getActiveMembership(sessionUser?.id)
 
-  console.log(activeMembership)
-
   return (
     <div className="px-3">
       <Card className="border-px mx-auto w-full max-w-6xl flex-row items-center justify-between rounded-full p-1.5 pl-5 backdrop-blur-3xl">
@@ -40,7 +38,7 @@ const Navbar = async () => {
         <div className="flex gap-2">
           <Link href={"/login"}>
             <Button size={"lg"} variant={sessionUser ? "outline" : "ghost"}>
-              {sessionUser ? sessionUser.fullName : "Sign In"}
+              {sessionUser ? sessionUser.name : "Sign In"}
             </Button>
           </Link>
           {!activeMembership && (
