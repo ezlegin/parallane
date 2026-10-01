@@ -1,5 +1,6 @@
 "use server"
 
+import { auth } from "@/auth"
 import { StudentFormTypes } from "@/lib/formSchema"
 import { prisma } from "@/prisma/prisma"
 import bcrypt from "bcrypt"
@@ -119,5 +120,49 @@ export async function setOnboarding(userId: string, data: { country: string }) {
   } catch (error) {
     console.error(error)
     return { error: (error as Error).message }
+  }
+}
+
+export async function updateUserProfile(data: { fullName: string }) {
+  try {
+    const session = await auth()
+    if (!session?.user?.email) {
+      return { error: "You must be signed in." }
+    }
+
+    await prisma.user.update({
+      where: { email: session.user.email },
+      data: { fullName: data.fullName },
+    })
+
+    revalidatePath("/panel/profile")
+
+    return { success: "Profile updated successfully." }
+  } catch (err) {
+    console.error("[updateUserProfile]", err)
+    return { error: "Failed to update profile. Try again." }
+  }
+}
+
+export async function updateUserPassword(data: { password: string }) {
+  try {
+    const session = await auth()
+    if (!session?.user?.email) {
+      return { error: "You must be signed in." }
+    }
+
+    const hashed = await bcrypt.hash(data.password, 10)
+
+    await prisma.user.update({
+      where: { email: session.user.email },
+      data: { password: hashed },
+    })
+
+    revalidatePath("/panel/profile")
+
+    return { success: "Password updated successfully." }
+  } catch (err) {
+    console.error("[updateUserPassword]", err)
+    return { error: "Failed to update password. Try again." }
   }
 }

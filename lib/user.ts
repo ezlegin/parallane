@@ -8,7 +8,7 @@ export async function searchUsers(query: string) {
     const users = await prisma.user.findMany({
       where: {
         email: {
-          contains: query,
+          contains: query.toLowerCase(),
         },
       },
       select: {

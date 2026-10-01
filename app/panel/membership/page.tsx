@@ -23,10 +23,10 @@ export default async function MembershipPage() {
   if (!user) redirect("/login")
   const activeMembership = await getActiveMembership(user.id)
 
-  const memberships = await prisma.membership.findMany({
+  const history = await prisma.membership.findMany({
     where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
   })
-  const history = memberships.filter((m) => m.id !== activeMembership?.id)
 
   return (
     <div className="space-y-8">

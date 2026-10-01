@@ -1,33 +1,25 @@
-import { CheckCircle2 } from "lucide-react"
-
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { auth } from "@/auth"
-
-const payments = [
-  {
-    date: "Sep 12, 2026",
-    amount: "$19.00",
-    status: "Paid",
-    invoice: "INV-2026-009",
-  },
-  {
-    date: "Aug 12, 2026",
-    amount: "$19.00",
-    status: "Paid",
-    invoice: "INV-2026-008",
-  },
-  {
-    date: "Jul 12, 2026",
-    amount: "$19.00",
-    status: "Paid",
-    invoice: "INV-2026-007",
-  },
-]
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { getSessionUser } from "@/lib/user"
+import { prisma } from "@/prisma/prisma"
+import { format } from "date-fns"
+import { redirect } from "next/navigation"
 
 export default async function PaymentsPage() {
-  const session = await auth()
-  console.log("session", session)
+  const user = await getSessionUser()
+  if (!user) redirect("/login")
+
+  const payments = await prisma.payment.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+  })
 
   return (
     <div className="space-y-8">
@@ -43,42 +35,73 @@ export default async function PaymentsPage() {
         </p>
       </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Payment history</CardTitle>
-        </CardHeader>
+      <div className="overflow-hidden rounded-xl border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Ref</TableHead>
+              <TableHead>Dued</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Issued At</TableHead>
+              <TableHead>Paid At</TableHead>
+              <TableHead>Discount Code</TableHead>
+              <TableHead>Discount Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-15" />
+            </TableRow>
+          </TableHeader>
 
-        <CardContent>
-          <div className="divide-y">
+          <TableBody>
             {payments.map((payment) => (
-              <div
-                key={payment.invoice}
-                className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex size-10 items-center justify-center rounded-full border">
-                    <CheckCircle2 className="size-4" />
-                  </div>
+              <TableRow key={payment.id}>
+                <TableCell>
+                  <span className="font-mono text-sm font-medium">
+                    {payment.reference}
+                  </span>
+                </TableCell>
 
-                  <div>
-                    <p className="font-medium">Membership</p>
+                <TableCell>€{payment.totalAmount.toFixed(2)}</TableCell>
 
-                    <p className="text-sm text-muted-foreground">
-                      {payment.date} · {payment.invoice}
-                    </p>
-                  </div>
-                </div>
+                <TableCell className="font-medium">
+                  <Badge variant="secondary" className="px-3 py-3 capitalize">
+                    €{payment.paidAmount.toFixed(2)}
+                  </Badge>
+                </TableCell>
 
-                <div className="flex items-center gap-4">
-                  <Badge variant="success">{payment.status}</Badge>
+                <TableCell className="whitespace-nowrap">
+                  {format(payment.createdAt, "Pp")}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {payment.paidAt ? format(payment.paidAt, "Pp") : "Not Paid"}
+                </TableCell>
 
-                  <span className="font-medium">{payment.amount}</span>
-                </div>
-              </div>
+                <TableCell>
+                  <span>{payment.discountCode ?? "-"}</span>
+                </TableCell>
+
+                <TableCell>
+                  <p>€{payment.discountAmount.toFixed(2)}</p>
+                </TableCell>
+
+                <TableCell>
+                  <Badge
+                    variant={
+                      payment.status === "success"
+                        ? "success"
+                        : payment.status === "pending"
+                          ? "warning"
+                          : "destructive"
+                    }
+                    className="capitalize"
+                  >
+                    {payment.status}
+                  </Badge>
+                </TableCell>
+              </TableRow>
             ))}
-          </div>
-        </CardContent>
-      </Card>
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }
