@@ -12,10 +12,10 @@ export default async function page() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Q&A</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Contacts</h1>
 
         <p className="text-sm text-muted-foreground">
-          Manage conversations and answer student questions.
+          Manage contacts and answer them.
         </p>
       </div>
 

@@ -158,8 +158,8 @@ const navigation = [
     icon: LayoutDashboard,
   },
   {
-    title: "My Courses",
-    href: "/panel/courses",
+    title: "Enrollemtns",
+    href: "/panel/enrollments",
     icon: BookOpen,
   },
   {
