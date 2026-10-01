@@ -1,12 +1,13 @@
 "use server"
 
 import { MembershipFormValues } from "@/lib/formSchema"
+import { incrementString } from "@/lib/incrementString"
 import { Payment } from "@/prisma/generated/prisma/client"
 import { prisma } from "@/prisma/prisma"
 import { revalidatePath } from "next/cache"
 
 export async function createMembership(values: MembershipFormValues) {
-  const { userId, paymentId, from, expiresAt, period } = values
+  const { userId, paymentId, from, expiresAt, period, status } = values
 
   try {
     const user = await prisma.user.findUnique({
@@ -30,17 +31,30 @@ export async function createMembership(values: MembershipFormValues) {
       where: {
         userId,
         status: "active",
-        expiresAt: { gt: new Date() },
+        startsAt: {
+          lt: expiresAt,
+        },
+        expiresAt: {
+          gt: from,
+        },
       },
     })
+
     if (existing) {
-      return { error: "This user already has an active membership." }
+      return {
+        error: "This user already has an active membership during this period.",
+      }
     }
+
+    const lastMembership = await prisma.membership.findFirst({
+      orderBy: { createdAt: "desc" },
+    })
 
     await prisma.membership.create({
       data: {
         userId,
-        reference: "par-004",
+        status,
+        reference: incrementString(lastMembership?.reference),
         price: payment ? payment.totalAmount : 0,
         payment: payment
           ? {
@@ -64,7 +78,7 @@ export async function updateMembership(
   id: string,
   values: MembershipFormValues
 ) {
-  const { userId, paymentId, from, expiresAt, period } = values
+  const { userId, paymentId, from, expiresAt, period, status } = values
 
   try {
     const membership = await prisma.membership.findUnique({
@@ -91,10 +105,16 @@ export async function updateMembership(
       }
     }
 
+    const lastMembership = await prisma.membership.findFirst({
+      orderBy: { createdAt: "desc" },
+    })
+
     await prisma.membership.update({
       where: { id },
       data: {
         userId,
+        status,
+        reference: incrementString(lastMembership?.reference),
         payment: payment
           ? {
               connect: { id: paymentId },

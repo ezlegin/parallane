@@ -1,7 +1,6 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm } from "react-hook-form"
+import { createMembership, updateMembership } from "@/actions/membership"
 import PaymentCombobox from "@/components/PaymentCombobox"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -19,15 +18,23 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import UserCombobox from "@/components/UserCombobox"
 import { MembershipFormValues, membershipSchema } from "@/lib/formSchema"
+import { handleRes } from "@/lib/handleRes"
 import { Membership, Payment, User } from "@/prisma/generated/prisma/client"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { cn } from "cn"
 import { addMonths, format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
-import { createMembership, updateMembership } from "@/actions/membership"
-import { handleRes } from "@/lib/handleRes"
 import { useRouter } from "next/navigation"
+import { Controller, useForm } from "react-hook-form"
 
 type MembershipFormProps = {
   membership?: Membership & { payment: Payment | null; user: User }
@@ -44,6 +51,7 @@ export function MembershipForm({ membership }: MembershipFormProps) {
       paymentId: membership?.payment?.id ?? "",
       period: membership?.period ?? "monthly",
       userId: membership?.userId ?? "",
+      status: membership?.status ?? "active",
     },
   })
 
@@ -228,6 +236,31 @@ export function MembershipForm({ membership }: MembershipFormProps) {
                       </div>
                     </label>
                   </RadioGroup>
+
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="status"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Status</FieldLabel>
+
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full capitalize">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="expired">Expired</SelectItem>
+                    </SelectContent>
+                  </Select>
 
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
