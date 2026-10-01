@@ -1,25 +1,6 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import {
-  ArrowLeft,
-  ArrowRight,
-  BadgeCheck,
-  BookOpen,
-  Check,
-  CreditCard,
-  Globe,
-  LockKeyhole,
-  ShieldCheck,
-  Tag,
-} from "lucide-react"
-
-import Link from "next/link"
-
+import { startPayment } from "@/actions/checkout"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,38 +14,33 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { toast } from "../ui/toast"
+import { CheckoutFormType, checkoutSchemaSchema } from "@/lib/formSchema"
+import { handleRes } from "@/lib/handleRes"
 import { membershipPrice } from "@/lib/membership"
-
-const checkoutSchema = z.object({
-  firstName: z.string().trim().min(1, "First name is required."),
-  lastName: z.string().trim().min(1, "Last name is required."),
-  city: z.string().trim().min(1, "City is required."),
-  country: z.string().trim().min(1, "Country is required."),
-  phoneNumber: z
-    .string()
-    .trim()
-    .min(5, "Please enter a valid phone number.")
-    .max(25, "Phone number is too long."),
-  postalCode: z
-    .string()
-    .trim()
-    .min(1, "Postal code is required.")
-    .max(20, "Postal code is too long."),
-  address: z.string().trim().min(3, "Address is required."),
-})
-
-type CheckoutValues = z.infer<typeof checkoutSchema>
+import { User } from "@/prisma/generated/prisma/client"
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+  ArrowLeft,
+  ArrowRight,
+  BadgeCheck,
+  BookOpen,
+  Check,
+  CreditCard,
+  Globe,
+  LockKeyhole,
+  ShieldCheck,
+  Tag,
+} from "lucide-react"
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import { CountryInput } from "../CountryInput"
+import { toast } from "../ui/toast"
+import { useRouter } from "next/navigation"
 
 type CheckoutFormProps = {
   plan: "monthly" | "annual"
-  user: {
-    firstName: string
-    lastName: string
-    country: string
-    email: string
-  }
-  ipCountry: string | null
+  user: Omit<User, "password">
 }
 
 const plans = {
@@ -87,30 +63,24 @@ const paymentMethods = ["VISA", "Mastercard", "AMEX", "PayPal"]
 function FormField({
   label,
   name,
-  placeholder,
   register,
   error,
   autoComplete,
 }: {
   label: string
-  name: keyof CheckoutValues
-  placeholder: string
-  register: ReturnType<typeof useForm<CheckoutValues>>["register"]
+  name: keyof CheckoutFormType
+  register: ReturnType<typeof useForm<CheckoutFormType>>["register"]
   error?: string
   autoComplete?: string
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={name} className="text-sm font-medium">
-        {label}
-      </Label>
-
       <Input
         id={name}
-        placeholder={placeholder}
+        label={label}
         autoComplete={autoComplete}
         aria-invalid={!!error}
-        className="h-11 rounded-xl border-border bg-background transition-colors focus-visible:ring-foreground/20"
+        className="h-13 rounded-xl border-border bg-background transition-colors focus-visible:ring-foreground/20"
         {...register(name)}
       />
 
@@ -119,25 +89,31 @@ function FormField({
   )
 }
 
-export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
+export function CheckoutForm({ plan, user }: CheckoutFormProps) {
+  const router = useRouter()
   const [discountCode, setDiscountCode] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedCountry, setSelectedCountry] = useState(user.country ?? "US")
+  const [countryIp, setCountryIp] = useState<string | null>(null)
+
+  const nameParts = user.name?.trim().split(/\s+/) ?? []
+  const firstName = nameParts.shift() ?? ""
+  const lastName = nameParts.join(" ")
 
   const selectedPlan = plans[plan]
 
-  const isIran = ipCountry === "IR"
-  const isUnitedStates = ipCountry === "US"
+  const isIran = countryIp === "IR"
+  const isUnitedStates = countryIp === "US"
 
-  const form = useForm<CheckoutValues>({
-    resolver: zodResolver(checkoutSchema),
+  const form = useForm<CheckoutFormType>({
+    resolver: zodResolver(checkoutSchemaSchema),
     defaultValues: {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      city: "",
-      country: user.country,
-      phoneNumber: "",
-      postalCode: "",
-      address: "",
+      firstName: firstName,
+      lastName: lastName,
+      city: user.city ?? "",
+      phoneNumber: user.phoneNumber ?? "",
+      postalCode: user.postalCode ?? "",
+      address: user.address ?? "",
     },
   })
 
@@ -147,7 +123,7 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
     formState: { errors },
   } = form
 
-  async function onSubmit(values: CheckoutValues) {
+  async function onSubmit(values: CheckoutFormType) {
     if (isIran || isUnitedStates) {
       toast.add({
         title: "Payment is currently unavailable for your location.",
@@ -157,27 +133,39 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
 
     setIsSubmitting(true)
 
-    try {
-      // TODO:
-      // 1. Send billing details and selected plan to a server action/API.
-      // 2. Validate the user's membership and plan on the server.
-      // 3. Recheck country restrictions on the server.
-      // 4. Create a payment session with your payment gateway.
-      // 5. Redirect the user to the gateway's hosted checkout page.
-      //
-      // Never trust the client-side price or country check.
+    const res = await startPayment(
+      { ...values, country: selectedCountry },
+      {
+        discountAmount: 0,
+        totalAmount: selectedPlan.price,
+        paidAmount: selectedPlan.price, //todo: replce with after applying discount.
+        discountCode: null,
+        period: plan,
+      },
+      user.id
+    )
 
-      console.log("Checkout values:", values)
-      console.log("Selected plan:", plan)
-      console.log("Discount code:", discountCode)
+    handleRes(res, {
+      onSuccess: () => res.paymentUrl && router.push(res.paymentUrl),
+    })
 
-      //   toast.info("Payment gateway integration is coming next.")
-    } catch {
-      //   toast.error("Something went wrong. Please try again.")
-    } finally {
-      setIsSubmitting(false)
-    }
+    setIsSubmitting(false)
   }
+
+  useEffect(() => {
+    const getUserCountry = async () => {
+      try {
+        const res = await fetch("https://ipinfo.io?token=41a6316c39fa84")
+        const data = await res.json()
+        const country = data.country
+        setCountryIp(country)
+      } catch (error) {
+        console.error("Error fetching IP information:", error)
+      }
+    }
+
+    getUserCountry()
+  }, [])
 
   return (
     <main className="min-h-screen bg-background">
@@ -292,7 +280,6 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                       <FormField
                         label="First name"
                         name="firstName"
-                        placeholder="John"
                         register={register}
                         error={errors.firstName?.message}
                         autoComplete="given-name"
@@ -301,7 +288,6 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                       <FormField
                         label="Last name"
                         name="lastName"
-                        placeholder="Smith"
                         register={register}
                         error={errors.lastName?.message}
                         autoComplete="family-name"
@@ -312,7 +298,7 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                   <Separator />
 
                   {/* Address */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
                       <h3 className="text-sm font-semibold">Billing address</h3>
 
@@ -324,37 +310,32 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                     <FormField
                       label="Address"
                       name="address"
-                      placeholder="Street address, apartment, suite, etc."
+
                       register={register}
                       error={errors.address?.message}
                       autoComplete="street-address"
                     />
 
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <FormField
                         label="City"
                         name="city"
-                        placeholder="New York"
                         register={register}
                         error={errors.city?.message}
                         autoComplete="address-level2"
                       />
 
-                      <FormField
-                        label="Country"
-                        name="country"
-                        placeholder="United States"
-                        register={register}
-                        error={errors.country?.message}
-                        autoComplete="country-name"
+                      <CountryInput
+                        value={selectedCountry}
+                        onChange={setSelectedCountry}
+                        className="h-12"
                       />
                     </div>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <FormField
                         label="Postal code"
                         name="postalCode"
-                        placeholder="10001"
                         register={register}
                         error={errors.postalCode?.message}
                         autoComplete="postal-code"
@@ -363,7 +344,6 @@ export function CheckoutForm({ plan, user, ipCountry }: CheckoutFormProps) {
                       <FormField
                         label="Phone number"
                         name="phoneNumber"
-                        placeholder="+1 555 000 0000"
                         register={register}
                         error={errors.phoneNumber?.message}
                         autoComplete="tel"

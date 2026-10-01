@@ -143,7 +143,13 @@ const PaymnetsList = ({
               </div>
 
               <Badge
-                variant={payment.status === "success" ? "success" : "outline"}
+                variant={
+                  payment.status === "success"
+                    ? "success"
+                    : payment.status === "failed"
+                      ? "destructive"
+                      : "warning"
+                }
               >
                 <CreditCard />
                 {payment.status}

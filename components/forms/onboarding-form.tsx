@@ -1,8 +1,11 @@
 "use client"
 
-import { countries } from "countries-list"
-import { useEffect, useMemo, useRef, useState, useTransition } from "react"
-import { ArrowRight, Check, ChevronsUpDown, Globe2 } from "lucide-react"
+import { ArrowRight } from "lucide-react"
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
+
+import { setOnboarding } from "@/actions/student"
+import { CountryInput } from "@/components/CountryInput"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -12,50 +15,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { setOnboarding } from "@/actions/student"
 import { handleRes } from "@/lib/handleRes"
-import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
 
 type Props = {
   firstName: string
   userId: string
 }
 
-const formattedCountries = Object.keys(countries)
-  .map((key) => ({
-    label: countries[key as keyof typeof countries].name,
-    value: key,
-    flag: `/flags/${key.toLowerCase()}.svg`,
-  }))
-  .sort((a, b) => a.label.localeCompare(b.label))
-
 export function CountryOnboardingForm({ firstName, userId }: Props) {
   const router = useRouter()
   const [selectedCountry, setSelectedCountry] = useState("US")
-  const [open, setOpen] = useState(false)
-  const [isPending, startTransition] = useTransition() //todo: use transition.
-  const [search, setSearch] = useState("")
-
-  const selectedCountryName = useMemo(
-    () =>
-      formattedCountries.find((country) => country.value === selectedCountry)
-        ?.label,
-    [selectedCountry]
-  )
+  const [isPending, startTransition] = useTransition()
 
   function onSubmit() {
     startTransition(async () => {
@@ -65,15 +35,6 @@ export function CountryOnboardingForm({ firstName, userId }: Props) {
     })
   }
 
-  const listRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    listRef.current?.scrollTo({
-      top: 0,
-      behavior: "instant",
-    })
-  }, [search])
-
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
       <div className="z-10 mx-auto w-full max-w-xl">
@@ -82,7 +43,6 @@ export function CountryOnboardingForm({ firstName, userId }: Props) {
             <CardTitle className="text-2xl font-bold tracking-tight sm:text-3xl">
               {firstName ? `Welcome, ${firstName}!` : "Welcome to Parallane!"}
             </CardTitle>
-
             <CardDescription className="max-w-sm text-sm leading-6">
               We're glad you're here. Before you begin your learning journey,
               tell us which country you're from.
@@ -90,94 +50,16 @@ export function CountryOnboardingForm({ firstName, userId }: Props) {
           </CardHeader>
 
           <CardContent className="px-6 pb-6 sm:px-10">
-            {/* Country selector */}
             <div className="space-y-2">
               <div className="text-sm font-semibold">
                 Which country are you from?
               </div>
 
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={open}
-                      className={cn(
-                        "h-12 w-full justify-between rounded-xl px-4 font-normal",
-                        !selectedCountry && "text-muted-foreground"
-                      )}
-                    >
-                      <span className="flex min-w-0 items-center gap-3">
-                        {selectedCountryName ? (
-                          <img
-                            src={`/flags/${selectedCountry}.svg`}
-                            width={20}
-                            height={"auto"}
-                          />
-                        ) : (
-                          <Globe2 className="size-4 shrink-0 text-muted-foreground" />
-                        )}
-
-                        <span className="truncate">
-                          {selectedCountryName ?? "Select your country"}
-                        </span>
-                      </span>
-
-                      <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-                    </Button>
-                  }
-                />
-
-                <PopoverContent
-                  align="start"
-                  className="w-(--radix-popover-trigger-width) min-w-70 p-0"
-                >
-                  <Command>
-                    <CommandInput
-                      placeholder="Search countries..."
-                      onValueChange={setSearch}
-                    />
-
-                    <CommandList ref={listRef}>
-                      <CommandEmpty>No country found.</CommandEmpty>
-
-                      <CommandGroup heading="Countries">
-                        {formattedCountries.map((country) => (
-                          <CommandItem
-                            key={country.value}
-                            value={`${country.label} ${country.value}`}
-                            onSelect={() => {
-                              setSelectedCountry(country.value)
-                              setOpen(false)
-                            }}
-                            className="cursor-pointer"
-                          >
-                            <div className="flex items-center gap-4">
-                              <img
-                                src={country.flag}
-                                width={19}
-                                height={"auto"}
-                              />
-                              <span>{country.label}</span>
-                            </div>
-
-                            <Check
-                              className={cn(
-                                "size-4",
-                                selectedCountry === country.value
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <CountryInput
+                value={selectedCountry}
+                onChange={setSelectedCountry}
+                className="h-12"
+              />
 
               <p className="text-xs leading-5 text-muted-foreground">
                 Your country helps us provide a more relevant experience and
@@ -205,7 +87,6 @@ export function CountryOnboardingForm({ firstName, userId }: Props) {
           </CardFooter>
         </Card>
 
-        {/* Footer */}
         <p className="mt-6 text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} Parallane. Learn. Build. Grow.
         </p>

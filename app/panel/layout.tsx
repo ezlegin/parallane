@@ -7,8 +7,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { SessionProvider } from "next-auth/react"
 import { getSessionUser } from "@/lib/user"
+import { SessionProvider } from "next-auth/react"
 import { redirect } from "next/navigation"
 
 export default async function PanelLayout({
@@ -17,7 +17,9 @@ export default async function PanelLayout({
   children: ReactNode
 }) {
   const sessionUser = await getSessionUser()
-  if (!sessionUser?.isOnboardingCompleted) redirect("/onboarding")
+  if (!sessionUser?.isOnboardingCompleted) {
+    redirect("/onboarding")
+  }
 
   return (
     <SidebarProvider>

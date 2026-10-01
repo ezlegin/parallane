@@ -265,7 +265,8 @@ model Payment {
   membershipId String?     @unique
   membership   Membership? @relation(fields: [membershipId], references: [id], onDelete: Cascade)
 
-  status PaymentStatus @default(pending)
+  status    PaymentStatus @default(pending)
+  authority String?
 
   totalAmount    Float
   discountAmount Float

@@ -20,6 +20,7 @@ import { useState, useTransition } from "react"
 import { signIn } from "next-auth/react"
 import { toast } from "@/components/ui/toast"
 import { GoogleOAuthSignIn } from "@/actions/OAuth"
+import { getUserByEmail } from "@/lib/user"
 
 const formSchema = z.object({
   fullName: z.string().optional(),
@@ -48,6 +49,15 @@ export default function LoginForm() {
       const res = await createStudent(data as Required<FormType>)
       handleRes(res, { onSuccess: () => router.push("/login/onboarding") })
     } else {
+      const user = await getUserByEmail(data.email)
+      if (!user?.password) {
+        toast.add({
+          title: "You should log in with google",
+          description:
+            "If you don't have access to your google account, reset your password.",
+        })
+        return
+      }
       const res = await signIn("user-login", {
         ...data,
         redirect: false,

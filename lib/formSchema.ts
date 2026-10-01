@@ -123,3 +123,22 @@ export const contactResponseFormSchema = z.object({
 })
 
 export type ContactResponseFormType = z.infer<typeof contactResponseFormSchema>
+
+export const checkoutSchemaSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required."),
+  lastName: z.string().trim().min(1, "Last name is required."),
+  city: z.string().trim().min(1, "City is required."),
+  phoneNumber: z
+    .string()
+    .trim()
+    .min(5, "Please enter a valid phone number.")
+    .max(25, "Phone number is too long."),
+  postalCode: z
+    .string()
+    .trim()
+    .min(1, "Postal code is required.")
+    .max(20, "Postal code is too long."),
+  address: z.string().trim().min(3, "Address is required."),
+})
+
+export type CheckoutFormType = z.infer<typeof checkoutSchemaSchema>
