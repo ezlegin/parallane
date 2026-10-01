@@ -107,3 +107,18 @@ export const adminProfileFormSchema = z.object({
 })
 
 export type AdminProfileFormType = z.infer<typeof adminProfileFormSchema>
+
+export const contactFormSchema = z.object({
+  fullName: z.string().min(2, "Please enter your name."),
+  email: z.email("Please enter a valid email address."),
+  subject: z.string().min(2, "Please enter a subject."),
+  message: z.string().min(10, "Please enter at least 10 characters."),
+})
+
+export type ContactFormType = z.infer<typeof contactFormSchema>
+
+export const contactResponseFormSchema = z.object({
+  message: z.string().min(3),
+})
+
+export type ContactResponseFormType = z.infer<typeof contactResponseFormSchema>

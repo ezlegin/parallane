@@ -1,10 +1,6 @@
 "use client"
 
-import { toast } from "@/components/ui/toast"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm } from "react-hook-form"
-import * as z from "zod"
-
+import { createContact } from "@/actions/contact"
 import GlowingStroke from "@/components/GlowingStroke"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,31 +8,33 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Field, FieldGroup } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { ContactFormType, contactFormSchema } from "@/lib/formSchema"
+import { handleRes } from "@/lib/handleRes"
+import { User } from "@/prisma/generated/prisma/client"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowUpRight } from "lucide-react"
+import { Controller, useForm } from "react-hook-form"
 
-const formSchema = z.object({
-  fullName: z.string().min(2, "Please enter your name."),
-  email: z.email("Please enter a valid email address."),
-  subject: z.string().min(2, "Please enter a subject."),
-  message: z.string().min(10, "Please enter at least 10 characters."),
-})
-
-export default function ContactForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+export default function ContactForm({
+  user,
+}: {
+  user?: Omit<User, "password"> | null
+}) {
+  const form = useForm<ContactFormType>({
+    resolver: zodResolver(contactFormSchema),
     defaultValues: {
-      fullName: "",
-      email: "",
+      fullName: user?.fullName ?? "",
+      email: user?.email ?? "",
       subject: "",
       message: "",
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log(data)
+  async function onSubmit(data: ContactFormType) {
+    const res = await createContact(data, user?.id)
 
-    toast.add({
-      title: "Message sent successfully.",
+    handleRes(res, {
+      successDescription: "We usually get back within 1–2 business days.",
     })
 
     form.reset()
@@ -77,7 +75,6 @@ export default function ContactForm() {
         <form id="contact-form" onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="p-6 md:p-8">
             <FieldGroup className="gap-5">
-              {/* Name + Email */}
               <div className="grid gap-5 sm:grid-cols-2">
                 <Controller
                   name="fullName"

@@ -60,6 +60,11 @@ enum TutorConversationStatus {
   closed
 }
 
+enum ContactStatus {
+  replied
+  waiting
+}
+
 enum CourseProgressStatus {
   notStarted
   inProgress
@@ -102,8 +107,25 @@ model User {
 
   couponUsages        CouponUsage[]
   passwordResetTokens PasswordResetToken[]
+  contacts            Contact[]
 
   @@index([createdAt])
+}
+
+model Contact {
+  id              String        @id @default(uuid())
+  status          ContactStatus @default(waiting)
+  subject         String
+  message         String        @db.Text()
+  responseMessage String?       @db.Text()
+  fullName        String
+  email           String
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  respondedAt DateTime?
 }
 
 model PasswordResetToken {

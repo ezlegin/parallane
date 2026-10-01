@@ -6,6 +6,7 @@ import {
   HelpCircle,
   LayoutDashboard,
   LogOut,
+  Mail,
   Ticket,
   UserPlus,
   UserRound,
@@ -197,6 +198,11 @@ const navigation = [
         title: "Q&A",
         href: "/admin/qa",
         icon: HelpCircle,
+      },
+      {
+        title: "Contact",
+        href: "/admin/contact",
+        icon: Mail,
       },
       {
         title: "Students",
