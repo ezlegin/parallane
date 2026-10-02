@@ -15,7 +15,7 @@ export default function CourseTrailer({
   level,
 }: CourseTrailerProps) {
   return (
-    <section className="border-b py-16 md:py-24">
+    <section className="border-b pb-16 md:pb-24">
       <div className="mx-auto max-w-6xl px-6">
         <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl border bg-muted/30 shadow-2xl">
           <video

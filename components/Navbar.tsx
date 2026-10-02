@@ -6,10 +6,10 @@ import { Card } from "./ui/card"
 
 const Navbar = async () => {
   const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/pricing", label: "Pricing" },
-    { href: "/contact", label: "Contact" },
+    { href: "/courses", label: "Courses" },
     { href: "/roadmaps", label: "Roadmaps" },
+    { href: "/contact", label: "Contact" },
+    { href: "/pricing", label: "Pricing" },
   ]
 
   const sessionUser = await getSessionUser()

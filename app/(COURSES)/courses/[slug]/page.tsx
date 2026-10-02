@@ -1,7 +1,3 @@
-import { notFound } from "next/navigation"
-
-import { courses } from "@/lib/courses"
-
 import CourseAudience from "@/components/course/CourseAudience"
 import CourseCertificate from "@/components/course/CourseCertificate"
 import CourseCurriculum from "@/components/course/CourseCurriculum"
@@ -9,7 +5,9 @@ import CourseFAQ from "@/components/course/CourseFAQ"
 import CourseHero from "@/components/course/CourseHero"
 import CourseMembership from "@/components/course/CourseMembership"
 import CourseOverview from "@/components/course/CourseOverview"
-import CourseTrailer from "@/components/course/CourseTrailer"
+import { FloatingPricingCard } from "@/components/FloatingPriceCard"
+import { prisma } from "@/prisma/prisma"
+import { notFound } from "next/navigation"
 
 interface CoursePageProps {
   params: Promise<{
@@ -20,7 +18,10 @@ interface CoursePageProps {
 export default async function CoursePage({ params }: CoursePageProps) {
   const { slug } = await params
 
-  const course = courses[slug]
+  const course = await prisma.course.findFirst({
+    where: { slug },
+    include: { seasons: { include: { lessons: true } } },
+  })
 
   if (!course) {
     notFound()
@@ -34,30 +35,32 @@ export default async function CoursePage({ params }: CoursePageProps) {
   return (
     <main>
       <CourseHero
+        duration={course.duration}
+        lessonCount={lessonCount}
+        level="beginner"
         category={course.category}
         title={course.title}
         summary={course.summary}
-        rating={course.rating}
-        reviews={course.reviews}
+        rating={5}
+        reviews={128}
       />
 
-      <CourseTrailer
-        duration={course.duration}
-        lessonCount={lessonCount}
-        level={course.level}
+      <CourseOverview description={course.description} learn={["test"]} />
+
+      <CourseCurriculum
+        seasons={course.seasons}
+        duration={course.duration.toString()}
       />
 
-      <CourseOverview description={course.description} learn={course.learn} />
-
-      <CourseCurriculum seasons={course.seasons} duration={course.duration} />
-
-      <CourseAudience items={course.targetAudience} />
+      <CourseAudience items={course.audience} />
 
       <CourseCertificate courseTitle={course.title} />
 
       <CourseMembership />
 
       <CourseFAQ />
+
+      <FloatingPricingCard hideWhenSelector="#membership-section" />
     </main>
   )
 }

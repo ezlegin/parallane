@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
 
     if (!authority) {
       return NextResponse.redirect(
-        `${origin}${route}?status=failed&reason=missing_authority`
+        `${origin}${route}?status=failed&reason=missing_authority`,
+        303
       )
     }
 
@@ -27,7 +28,8 @@ export async function POST(req: NextRequest) {
       })
 
       return NextResponse.redirect(
-        `${origin}${route}?status=failed&authority=${authority}`
+        `${origin}${route}?status=failed&authority=${authority}`,
+        303
       )
     }
 
@@ -38,13 +40,15 @@ export async function POST(req: NextRequest) {
 
     if (!payment) {
       return NextResponse.redirect(
-        `${origin}${route}?status=failed&reason=not_found`
+        `${origin}${route}?status=failed&reason=not_found`,
+        303
       )
     }
 
     if (payment.status === "success") {
       return NextResponse.redirect(
-        `${origin}${route}status=success&ref=${payment.reference}`
+        `${origin}${route}status=success&ref=${payment.reference}`,
+        303
       )
     }
 
@@ -57,7 +61,8 @@ export async function POST(req: NextRequest) {
       })
 
       return NextResponse.redirect(
-        `${origin}${route}?status=failed&authority=${authority}`
+        `${origin}${route}?status=failed&authority=${authority}`,
+        303
       )
     }
 
@@ -124,6 +129,7 @@ export async function POST(req: NextRequest) {
       303
     )
   } catch (error) {
+    console.error(error)
     return NextResponse.redirect(
       `${process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://parallane.com"}${route}?status=failed&reason=unkown_error`,
       303

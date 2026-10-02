@@ -10,11 +10,13 @@ export const Directions = () => {
     {
       number: "01",
       title: "Web Designer",
+      key: "web-design",
       description:
         "Learn visual design, UI design, Figma, and the principles behind great websites.",
     },
     {
       number: "02",
+      key: "front-end",
       title: "Front-End Developer",
       description:
         "Go from HTML and CSS to JavaScript, React, TypeScript, and Next.js.",
@@ -22,6 +24,7 @@ export const Directions = () => {
     {
       number: "03",
       title: "Back-End Developer",
+      key: "back-end",
       description:
         "Learn databases, APIs, Node.js, Docker, and everything behind the interface.",
     },
@@ -52,7 +55,7 @@ export const Directions = () => {
             {directions.map((roadmap) => (
               <Card key={roadmap.number} className="p-0">
                 <Link
-                  href="/roadmaps"
+                  href={`/roadmaps/${roadmap.key}`}
                   className="group grid grid-cols-[30px_1fr_auto] items-start gap-6 px-4 py-3 transition-colors hover:bg-muted/30"
                 >
                   <span className="font-mono text-sm text-muted-foreground">

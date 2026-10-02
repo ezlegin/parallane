@@ -7,10 +7,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
-import type { CourseSeason } from "@/lib/courses"
+import { Lesson, Season } from "@/prisma/generated/prisma/client"
 
 interface CourseCurriculumProps {
-  seasons: CourseSeason[]
+  seasons: (Season & { lessons: Lesson[] })[]
   duration: string
 }
 
@@ -67,14 +67,17 @@ export default function CourseCurriculum({
                       {season.title}
                     </h3>
 
-                    <p className="mt-1 max-w-xl text-sm leading-6 font-normal text-muted-foreground">
-                      {season.description}
+                    <p className="max-w-xl text-sm leading-6 font-normal text-muted-foreground">
+                      Season {seasonIndex + 1}
                     </p>
                   </div>
 
                   <div className="hidden shrink-0 items-center gap-2 text-xs text-muted-foreground sm:flex">
                     <Clock3 className="size-3.5" />
-                    {season.duration}
+                    {season.lessons.reduce(
+                      (acc, curr) => acc + curr.duration,
+                      0
+                    )}
                   </div>
                 </div>
               </AccordionTrigger>
@@ -101,9 +104,9 @@ export default function CourseCurriculum({
                           )}
                         </div>
 
-                        <p className="min-w-0 flex-1 truncate text-sm font-medium">
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium">
                           {lesson.title}
-                        </p>
+                        </span>
 
                         <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
                           <Clock3 className="size-3" />
