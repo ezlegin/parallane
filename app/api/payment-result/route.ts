@@ -1,3 +1,4 @@
+import { verifyPayment } from "@/actions/yekPay"
 import { incrementString } from "@/lib/incrementString"
 import { MembershipPeriod } from "@/prisma/generated/prisma/enums"
 import { prisma } from "@/prisma/prisma"
@@ -19,8 +20,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // if (success !== "100") {
-    if (success !== "0") {
+    if (success !== "100") {
       await prisma.payment.update({
         where: { authority, status: "pending" },
         data: { status: "failed" },
@@ -48,8 +48,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // const verify = await verifyPayment(authority)
-    const verify = { success: true }
+    const verify = await verifyPayment(authority)
 
     if (!verify.success) {
       await prisma.payment.update({
@@ -71,6 +70,31 @@ export async function POST(req: NextRequest) {
           paidAmount: payment.totalAmount - payment.discountAmount,
         },
       })
+
+      if (payment.discountCode) {
+        const code = payment.discountCode
+        const existingCoupon = await prisma.coupon.findFirst({
+          where: { code },
+        })
+
+        if (!existingCoupon) return { error: "Coupon code is not valid." }
+
+        await prisma.couponUsage.create({
+          data: {
+            discountAmount: payment.discountAmount,
+            paymentId: payment.id,
+            couponId: existingCoupon.id,
+            userId: payment.userId,
+          },
+        })
+
+        await prisma.coupon.update({
+          where: { code: existingCoupon.code },
+          data: {
+            usageCount: { increment: 1 },
+          },
+        })
+      }
 
       await tx.membership.updateMany({
         where: { userId: payment.user.id },

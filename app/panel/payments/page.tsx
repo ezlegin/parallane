@@ -39,14 +39,30 @@ export default async function PaymentsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ref</TableHead>
-              <TableHead>Dued</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Issued At</TableHead>
-              <TableHead>Paid At</TableHead>
-              <TableHead>Discount Code</TableHead>
-              <TableHead>Discount Amount</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="text-xs text-muted-foreground">
+                Ref
+              </TableHead>
+              <TableHead className="text-xs text-muted-foreground">
+                Dued
+              </TableHead>
+              <TableHead className="text-xs text-muted-foreground">
+                Total
+              </TableHead>
+              <TableHead className="text-xs text-muted-foreground">
+                Issued At
+              </TableHead>
+              <TableHead className="text-xs text-muted-foreground">
+                Paid At
+              </TableHead>
+              <TableHead className="text-xs text-muted-foreground">
+                Discount Code
+              </TableHead>
+              <TableHead className="text-xs text-muted-foreground">
+                Discount Amount
+              </TableHead>
+              <TableHead className="text-xs text-muted-foreground">
+                Status
+              </TableHead>
               <TableHead className="w-15" />
             </TableRow>
           </TableHeader>

@@ -23,7 +23,7 @@ export const couponSchema = z.object({
     .string()
     .min(1, "Coupon code is required")
     .max(50, "Coupon code is too long")
-    .transform((value) => value.trim().toUpperCase()),
+    .transform((value) => value.trim()),
   type: z.enum(["fixed", "percentage"]),
   amount: z.string(),
   expiresAt: z.date(),

@@ -3,40 +3,21 @@
 import { startPayment } from "@/actions/checkout"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
+import { toast } from "@/components/ui/toast"
 import { CheckoutFormType, checkoutSchemaSchema } from "@/lib/formSchema"
 import { handleRes } from "@/lib/handleRes"
 import { membershipPrice } from "@/lib/membership"
 import { User } from "@/prisma/generated/prisma/client"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  ArrowLeft,
-  ArrowRight,
-  BadgeCheck,
-  BookOpen,
-  Check,
-  CreditCard,
-  Globe,
-  LockKeyhole,
-  ShieldCheck,
-  Tag,
-} from "lucide-react"
+import { ArrowLeft, Globe, LockKeyhole, ShieldCheck } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { CountryInput } from "../CountryInput"
-import { toast } from "../ui/toast"
-import { useRouter } from "next/navigation"
+import { SupportCard } from "../SupportCard"
+import { BillingInformationCard } from "./BillingInformationCard"
+import { BillingSummaryCard } from "./BillingSummaryCard"
+import { getCouponByCode } from "@/lib/coupon"
 
 type CheckoutFormProps = {
   plan: "monthly" | "annual"
@@ -58,49 +39,29 @@ const plans = {
   },
 }
 
-const paymentMethods = ["VISA", "Mastercard", "AMEX", "PayPal"]
-
-function FormField({
-  label,
-  name,
-  register,
-  error,
-  autoComplete,
-}: {
-  label: string
-  name: keyof CheckoutFormType
-  register: ReturnType<typeof useForm<CheckoutFormType>>["register"]
-  error?: string
-  autoComplete?: string
-}) {
-  return (
-    <div className="space-y-2">
-      <Input
-        id={name}
-        label={label}
-        autoComplete={autoComplete}
-        aria-invalid={!!error}
-        className="h-13 rounded-xl border-border bg-background transition-colors focus-visible:ring-foreground/20"
-        {...register(name)}
-      />
-
-      {error && <p className="text-xs text-destructive">{error}</p>}
-    </div>
-  )
-}
+const benefits = [
+  "Access to all available courses",
+  "Follow structured learning roadpaths",
+  "Learn at your own pace",
+  "Ask tutor questions",
+]
 
 export function CheckoutForm({ plan, user }: CheckoutFormProps) {
   const router = useRouter()
-  const [discountCode, setDiscountCode] = useState("")
+  const selectedPlan = plans[plan]
+
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    amount: number
+    code: string
+  } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState(user.country ?? "US")
   const [countryIp, setCountryIp] = useState<string | null>(null)
+  const [total, setTotal] = useState(selectedPlan.price)
 
   const nameParts = user.name?.trim().split(/\s+/) ?? []
   const firstName = nameParts.shift() ?? ""
   const lastName = nameParts.join(" ")
-
-  const selectedPlan = plans[plan]
 
   const isIran = countryIp === "IR"
   const isUnitedStates = countryIp === "US"
@@ -108,20 +69,14 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
   const form = useForm<CheckoutFormType>({
     resolver: zodResolver(checkoutSchemaSchema),
     defaultValues: {
-      firstName: firstName,
-      lastName: lastName,
+      firstName,
+      lastName,
       city: user.city ?? "",
       phoneNumber: user.phoneNumber ?? "",
       postalCode: user.postalCode ?? "",
       address: user.address ?? "",
     },
   })
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = form
 
   async function onSubmit(values: CheckoutFormType) {
     if (isIran || isUnitedStates) {
@@ -136,10 +91,10 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
     const res = await startPayment(
       { ...values, country: selectedCountry },
       {
-        discountAmount: 0,
         totalAmount: selectedPlan.price,
-        paidAmount: selectedPlan.price, //todo: replce with after applying discount.
-        discountCode: null,
+        paidAmount: total,
+        discountCode: appliedCoupon?.code ?? null,
+        discountAmount: appliedCoupon?.amount ?? 0,
         period: plan,
       },
       user.id
@@ -157,8 +112,7 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
       try {
         const res = await fetch("https://ipinfo.io?token=41a6316c39fa84")
         const data = await res.json()
-        const country = data.country
-        setCountryIp(country)
+        setCountryIp(data.country)
       } catch (error) {
         console.error("Error fetching IP information:", error)
       }
@@ -166,6 +120,61 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
 
     getUserCountry()
   }, [])
+
+  const onDiscountApplied = async (code: string) => {
+    if (appliedCoupon) {
+      setTotal(selectedPlan.price)
+      setAppliedCoupon(null)
+      return
+    }
+
+    const coupon = await getCouponByCode(code)
+
+    if (!coupon) {
+      toast.add({
+        type: "error",
+        description: "Try a valid discount code",
+        title: "Discount code is not valid.",
+      })
+      return
+    }
+
+    if (coupon.expiresAt && coupon.expiresAt < new Date()) {
+      toast.add({
+        type: "error",
+        description: "Try a valid discount code",
+        title: "This Discount code is expired.",
+      })
+      return
+    }
+
+    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
+      toast.add({
+        type: "error",
+        description: "Try a valid discount code",
+        title: "This Discount code has reached to its usage limit.",
+      })
+      return
+    }
+
+    switch (coupon.discountType) {
+      case "fixed":
+        setTotal((pre) => Math.max(pre - coupon.discountAmount, 0))
+        setAppliedCoupon({ amount: coupon.discountAmount, code: coupon.code })
+        break
+      case "percentage":
+        setTotal((pre) => {
+          const factor = 1 - coupon.discountAmount / 100
+          const newTotal = Number((pre * factor).toFixed(2))
+          setAppliedCoupon({
+            amount: +(selectedPlan.price - newTotal).toFixed(2),
+            code: coupon.code,
+          })
+          return newTotal
+        })
+        break
+    }
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -177,7 +186,7 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
           </Link>
 
           <Badge
-            variant={"outline"}
+            variant="outline"
             className="flex items-center gap-2 py-3 sm:text-sm"
           >
             <LockKeyhole className="size-3.5" />
@@ -187,7 +196,7 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
       </header>
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-        {/* Page heading */}
+        {/* Heading */}
         <div className="mb-8">
           <Link
             href="/pricing"
@@ -217,11 +226,13 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
           </div>
         </div>
 
-        {/* Geographic notices */}
+        {/* Geographic alerts — kept in parent because they gate submission */}
         {isIran && (
-          <Alert dir="rtl" className="mb-6 border-destructive bg-transparent">
+          <Alert
+            dir="rtl"
+            className="mb-6 border-destructive bg-destructive/10"
+          >
             <Globe className="size-4" />
-
             <AlertDescription className="text-right text-sm leading-6">
               <span className="font-semibold text-foreground">
                 امکان خرید از این موقعیت جغرافیایی وجود ندارد.
@@ -234,9 +245,8 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
         )}
 
         {isUnitedStates && (
-          <Alert className="mb-6 border-destructive bg-transparent">
+          <Alert className="mb-6 border-destructive bg-destructive/10">
             <Globe className="size-4" />
-
             <AlertDescription className="text-sm leading-6">
               <span className="font-semibold text-foreground">
                 Payments are currently unavailable in your location.
@@ -248,396 +258,45 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
           </Alert>
         )}
 
-        {/* Checkout layout */}
+        {/* Layout */}
         <div className="grid items-start gap-8 lg:grid-cols-[1fr_380px]">
-          {/* Billing form */}
           <section>
-            <Card className="rounded-2xl shadow-sm">
-              <CardHeader className="space-y-2 border-b px-5 py-5 sm:px-7">
-                <CardTitle className="text-xl">Billing information</CardTitle>
-
-                <CardDescription>
-                  Enter the details required to process your payment.
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="px-5 py-6 sm:px-7">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Account information */}
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-semibold">
-                        Personal details
-                      </h3>
-
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Make sure your details match the information required by
-                        your payment provider.
-                      </p>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <FormField
-                        label="First name"
-                        name="firstName"
-                        register={register}
-                        error={errors.firstName?.message}
-                        autoComplete="given-name"
-                      />
-
-                      <FormField
-                        label="Last name"
-                        name="lastName"
-                        register={register}
-                        error={errors.lastName?.message}
-                        autoComplete="family-name"
-                      />
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Address */}
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="text-sm font-semibold">Billing address</h3>
-
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Provide your billing address.
-                      </p>
-                    </div>
-
-                    <FormField
-                      label="Address"
-                      name="address"
-
-                      register={register}
-                      error={errors.address?.message}
-                      autoComplete="street-address"
-                    />
-
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <FormField
-                        label="City"
-                        name="city"
-                        register={register}
-                        error={errors.city?.message}
-                        autoComplete="address-level2"
-                      />
-
-                      <CountryInput
-                        value={selectedCountry}
-                        onChange={setSelectedCountry}
-                        className="h-12"
-                      />
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <FormField
-                        label="Postal code"
-                        name="postalCode"
-                        register={register}
-                        error={errors.postalCode?.message}
-                        autoComplete="postal-code"
-                      />
-
-                      <FormField
-                        label="Phone number"
-                        name="phoneNumber"
-                        register={register}
-                        error={errors.phoneNumber?.message}
-                        autoComplete="tel"
-                      />
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Account email */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Account email</Label>
-
-                    <Input
-                      value={user.email}
-                      readOnly
-                      className="h-11 rounded-xl bg-muted/40 text-muted-foreground"
-                    />
-
-                    <p className="text-xs text-muted-foreground">
-                      Your membership will be associated with this account.
-                    </p>
-                  </div>
-
-                  {/* Payment information */}
-                  <div className="rounded-xl border bg-muted/20 p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background">
-                        <CreditCard className="size-4" />
-                      </div>
-
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">Payment details</p>
-
-                        <p className="text-xs leading-5 text-muted-foreground">
-                          You&apos;ll continue to our payment provider to
-                          complete your purchase securely. Your card details
-                          won&apos;t be collected on this page.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || isIran || isUnitedStates}
-                    className="h-12 w-full rounded-xl text-sm font-semibold"
-                  >
-                    {isSubmitting ? (
-                      "Preparing checkout..."
-                    ) : (
-                      <>
-                        Continue to payment
-                        <ArrowRight className="ml-2 size-4" />
-                      </>
-                    )}
-                  </Button>
-
-                  <p className="text-center text-xs leading-5 text-muted-foreground">
-                    By continuing, you agree to Parallane&apos;s{" "}
-                    <Link
-                      href="/terms"
-                      className="underline underline-offset-4 hover:text-foreground"
-                    >
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link
-                      href="/privacy"
-                      className="underline underline-offset-4 hover:text-foreground"
-                    >
-                      Privacy Policy
-                    </Link>
-                    .
-                  </p>
-                </form>
-              </CardContent>
-            </Card>
+            <BillingInformationCard
+              form={form}
+              user={{ email: user.email }}
+              selectedCountry={selectedCountry}
+              onCountryChange={setSelectedCountry}
+              isSubmitting={isSubmitting}
+              disabled={isIran || isUnitedStates}
+              onSubmit={onSubmit}
+            />
           </section>
 
-          {/* Order summary */}
           <aside className="space-y-5 lg:sticky lg:top-8">
-            <Card className="overflow-hidden rounded-2xl shadow-sm">
-              <CardHeader className="border-b px-5 py-5">
-                <CardTitle className="text-lg">Order summary</CardTitle>
-
-                <CardDescription>
-                  Review your membership before continuing.
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-5 p-5">
-                {/* Product */}
-                <div className="flex items-start gap-3">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border bg-muted/40">
-                    <BookOpen className="size-5" />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-semibold">{selectedPlan.name}</h3>
-
-                      {plan === "annual" && (
-                        <Badge variant={"success"}>Best value</Badge>
-                      )}
-                    </div>
-
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {selectedPlan.description}
-                    </p>
-
-                    <p className="mt-2 text-sm font-medium">
-                      {plan === "annual"
-                        ? `€${membershipPrice.annual / 12}/month equivalent`
-                        : `€${membershipPrice.monthly}/month`}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Membership benefits */}
-                <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
-                  {[
-                    "Access to all available courses",
-                    "Follow structured learning roadpaths",
-                    "Learn at your own pace",
-                    "Ask tutor questions",
-                  ].map((benefit) => (
-                    <div key={benefit} className="flex items-start gap-2.5">
-                      <Check className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-
-                      <span className="text-xs leading-5 text-muted-foreground">
-                        {benefit}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Discount code */}
-                <div className="space-y-3">
-                  <Label
-                    htmlFor="discount-code"
-                    className="flex items-center gap-2 text-sm font-medium"
-                  >
-                    <Tag className="size-4" />
-                    Discount code
-                  </Label>
-
-                  <div className="grid w-full grid-cols-[1fr_auto] gap-2">
-                    <Input
-                      id="discount-code"
-                      value={discountCode}
-                      onChange={(event) => setDiscountCode(event.target.value)}
-                      placeholder="Enter code"
-                      className="h-10 w-full min-w-0 rounded-xl"
-                    />
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-10 rounded-xl"
-                      onClick={() =>
-                        toast.add({
-                          title: "Discount codes will be available soon.",
-                        })
-                      }
-                    >
-                      Apply
-                    </Button>
-                  </div>
-
-                  <p className="text-xs leading-5 text-muted-foreground">
-                    Have a promotional code? Enter it here.
-                  </p>
-                </div>
-
-                <Separator />
-
-                {/* Price breakdown */}
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-muted-foreground">Membership</span>
-
-                    <span className="font-medium">€{selectedPlan.price}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-muted-foreground">Discount</span>
-
-                    <span className="text-muted-foreground">—</span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-muted-foreground">Taxes</span>
-
-                    <span className="text-muted-foreground">€0</span>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <div className="flex items-end justify-between gap-4">
-                    <span className="font-semibold">Total</span>
-
-                    <span className="text-3xl font-bold tracking-tight">
-                      €{selectedPlan.price}
-                    </span>
-                  </div>
-
-                  <p className="text-right text-xs text-muted-foreground">
-                    {selectedPlan.billing}
-                  </p>
-                </div>
-
-                {/* Annual savings */}
-                {plan === "annual" && (
-                  <div className="rounded-xl border bg-muted/30 p-4">
-                    <div className="flex items-center gap-2">
-                      <BadgeCheck className="size-5 text-green-500" />
-
-                      <p className="text-sm font-semibold">
-                        Save €
-                        {membershipPrice.monthly * 12 - membershipPrice.annual}{" "}
-                        per year
-                      </p>
-                    </div>
-
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      Pay €{membershipPrice.annual} for 12 months instead of €
-                      {membershipPrice.monthly * 12} when paying monthly.
-                    </p>
-                  </div>
-                )}
-
-                {/* Payment methods */}
-                <div className="space-y-3">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    PAYMENT METHODS
-                  </p>
-
-                  <div className="grid grid-cols-4 items-center gap-2">
-                    {paymentMethods.map((method) => (
-                      <div
-                        key={method}
-                        className="flex h-9 items-center justify-center rounded-lg border bg-background px-3 text-xs font-bold tracking-tight"
-                      >
-                        {method}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Security note */}
-                <div className="flex items-center justify-center gap-2 border-t pt-4 text-xs text-muted-foreground">
-                  <LockKeyhole className="size-3.5" />
-                  Secure payment processing
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Help card */}
-            <div className="rounded-2xl border p-5">
-              <p className="text-sm font-semibold">
-                Need help with your purchase?
-              </p>
-
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                If you have questions about membership or payment, our team is
-                here to help.
-              </p>
-
-              <Link href="/contact">
-                <Button variant="link" className="mt-2 h-auto p-0 text-sm">
-                  Contact support
-                  <ArrowRight className="ml-1 size-3.5" />
-                </Button>
-              </Link>
-            </div>
+            <BillingSummaryCard
+              appliedCoupon={appliedCoupon}
+              total={total}
+              plan={plan}
+              planName={selectedPlan.name}
+              planPrice={selectedPlan.price}
+              planBilling={selectedPlan.billing}
+              planDescription={selectedPlan.description}
+              benefits={benefits}
+              onDiscountApplied={onDiscountApplied}
+            />
+            <SupportCard />
           </aside>
         </div>
 
-        {/* Footer reassurance */}
+        {/* Footer */}
         <div className="mt-10 flex flex-col items-center justify-center gap-3 text-center text-xs text-muted-foreground sm:flex-row sm:gap-6">
           <span className="flex items-center gap-1.5">
             <ShieldCheck className="size-3.5" />
             Secure checkout
           </span>
-
           <span className="hidden sm:block">·</span>
-
           <span>Transparent membership pricing</span>
-
           <span className="hidden sm:block">·</span>
-
           <span>Parallane Learning Platform</span>
         </div>
       </div>

@@ -24,7 +24,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return true
       }
     },
+    async jwt({ token, user }) {
+      if (user) return token
+
+      if (token.sub) {
+        const exists = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { id: true },
+        })
+
+        if (!exists) {
+          return null
+        }
+      }
+
+      return token
+    },
   },
+
   basePath: "/api/auth",
   cookies: {
     sessionToken: {
