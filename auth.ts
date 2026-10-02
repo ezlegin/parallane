@@ -32,13 +32,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { id: token.sub },
           select: { id: true },
         })
-
         if (!exists) {
           return null
         }
       }
 
       return token
+    },
+    session({ session, token }) {
+      session.user.id = token.id as string
+      return session
     },
   },
 
@@ -72,7 +75,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const ok = await bcrypt.compare(password, user.password)
         if (!ok) throw new Error("Invalid Credentials.")
 
-        return { id: user.id, email: user.email, name: user.name }
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        }
       },
     }),
   ],

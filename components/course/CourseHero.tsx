@@ -7,12 +7,16 @@ import {
   Play,
   Star,
 } from "lucide-react"
-import Link from "next/link"
 
 import GlowingStroke from "@/components/GlowingStroke"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { getSessionUser } from "@/lib/user"
 import { CourseCategory } from "@/prisma/generated/prisma/enums"
+import { prisma } from "@/prisma/prisma"
+import { SessionProvider } from "next-auth/react"
+import Link from "next/link"
+import CourseEnrollButton from "./CourseEnrollButton"
 
 interface CourseHeroProps {
   category: CourseCategory
@@ -25,9 +29,10 @@ interface CourseHeroProps {
   lessonCount: number
   level: string
   trailerUrl?: string
+  courseId: string
 }
 
-export default function CourseHero({
+export default async function CourseHero({
   category,
   title,
   summary,
@@ -37,8 +42,18 @@ export default function CourseHero({
   duration,
   lessonCount,
   level,
+  courseId,
   trailerUrl,
 }: CourseHeroProps) {
+  const user = await getSessionUser()
+
+  const isUserEnrolled = user
+    ? await prisma.enrollment.findFirst({
+        where: { courseId, userId: user.id },
+        include: { classroom: true },
+      })
+    : undefined
+
   return (
     <section className="relative overflow-hidden bg-zinc-950 text-zinc-50">
       {/* Grid */}
@@ -162,15 +177,24 @@ export default function CourseHero({
 
             {/* CTAs */}
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
-              <Link href="/pricing" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="group h-14 w-full rounded-full bg-white px-8 text-sm font-semibold text-zinc-950 shadow-2xl shadow-white/10 transition-all hover:scale-[1.03] hover:bg-zinc-100 hover:shadow-white/20 sm:w-auto"
+              {isUserEnrolled ? (
+                <Link
+                  href={`/classroom/${isUserEnrolled.classroom?.id}`}
+                  className="w-full sm:w-auto"
                 >
-                  Start learning today
-                  <ArrowUpRight className="ml-2 size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </Button>
-              </Link>
+                  <Button
+                    size="lg"
+                    className="group h-14 w-full rounded-full border-green-500/80 bg-green-500/10 px-8 text-sm font-semibold text-green-400 shadow-2xl shadow-foreground/10 hover:bg-green-500/20 sm:w-auto"
+                  >
+                    Enrolled, Continue Learning...
+                    <ArrowUpRight className="ml-2 size-4 transition-transform" />
+                  </Button>
+                </Link>
+              ) : (
+                <SessionProvider>
+                  <CourseEnrollButton courseId={courseId} />
+                </SessionProvider>
+              )}
 
               <a href="#curriculum" className="w-full sm:w-auto">
                 <Button

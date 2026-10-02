@@ -35,6 +35,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
   return (
     <main>
       <CourseHero
+        courseId={course.id}
         duration={course.duration}
         lessonCount={lessonCount}
         level="beginner"

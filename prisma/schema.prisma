@@ -112,6 +112,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   contacts            Contact[]
   accounts            Account[]
+  classrooms          Classroom[]
 
   @@index([createdAt])
   @@map("users")
@@ -192,6 +193,7 @@ model Course {
   courseProgresses   CourseProgress[]
   certificates       Certificate[]
   tutorConversations TutorConversation[]
+  classrooms         Classroom[]
 
   @@index([category])
   @@index([status])
@@ -353,11 +355,27 @@ model Enrollment {
 
   completedAt DateTime?
 
-  progress CourseProgress?
+  progress  CourseProgress?
+  classroom Classroom?
 
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
+}
+
+model Classroom {
+  id String @id @default(uuid())
+
+  enrollmentId String     @unique
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }
 
 model CourseProgress {

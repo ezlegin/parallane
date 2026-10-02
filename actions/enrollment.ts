@@ -48,12 +48,18 @@ export async function createEnrollment(values: EnrollmentFormType) {
       orderBy: { enrolledAt: "desc" },
     })
 
-    await prisma.enrollment.create({
+    const newEnrollment = await prisma.enrollment.create({
       data: {
         userId,
         reference: incrementString(lastEnrollment?.reference),
         courseId,
         enrolledAt,
+        classroom: {
+          create: {
+            courseId,
+            userId,
+          },
+        },
         membershipId: activeMembership.id,
         progress: {
           create: {
@@ -63,9 +69,13 @@ export async function createEnrollment(values: EnrollmentFormType) {
           },
         },
       },
+      include: { classroom: true },
     })
 
-    return { success: "Enrollment created successfully." }
+    return {
+      success: "Enrollment created successfully.",
+      classroomId: newEnrollment.classroom?.id,
+    }
   } catch (err) {
     console.error("[createEnrollment]", err)
     return { error: "Failed to create enrollment. Try again." }

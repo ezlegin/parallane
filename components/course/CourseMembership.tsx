@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import {
   ArrowUpRight,
@@ -12,10 +13,19 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { membershipPrice } from "@/lib/membership"
 
 const perks = ["Every course", "New releases", "Ask tutor", "Certificates"]
 
 export default function CourseMembership() {
+  const [period, setPeriod] = useState<"monthly" | "annual">("monthly")
+  const isAnnual = period === "annual"
+
+  const displayPrice = isAnnual
+    ? Math.round(membershipPrice.annual / 12)
+    : membershipPrice.monthly
+
   return (
     <section
       id="membership-section"
@@ -31,21 +41,25 @@ export default function CourseMembership() {
           backgroundSize: "48px 48px",
         }}
       />
+
       {/* Top spotlight */}
       <div
         aria-hidden
         className="pointer-events-none absolute top-0 left-1/2 h-150 w-225 -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground/20 blur-[120px]"
       />
 
+      {/* Bottom-right warm glow */}
       <div
         aria-hidden
         className="pointer-events-none absolute right-0 bottom-0 h-125 w-175 translate-x-1/4 translate-y-1/4 rounded-full bg-foreground/10 blur-[100px]"
       />
+
       {/* Animated halo */}
       <div
         aria-hidden
         className="pointer-events-none absolute top-1/2 left-1/4 h-70 w-70 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-white/10 blur-[80px]"
       />
+
       {/* Noise */}
       <div
         aria-hidden
@@ -55,6 +69,7 @@ export default function CourseMembership() {
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
         }}
       />
+
       <div className="relative mx-auto max-w-6xl px-6 py-24 md:py-32">
         <div className="grid items-center gap-16 lg:grid-cols-[1fr_380px]">
           {/* LEFT — Content */}
@@ -112,12 +127,44 @@ export default function CourseMembership() {
 
           {/* RIGHT — Floating card (desktop only) */}
           <div className="hidden lg:block">
-            <FloatingPriceCard />
+            <FloatingPriceCard
+              period={period}
+              onPeriodChange={setPeriod}
+              isAnnual={isAnnual}
+              displayPrice={displayPrice}
+            />
           </div>
         </div>
 
         {/* Mobile CTA — shown below lg */}
         <div className="mt-12 text-center lg:hidden">
+          {/* Billing toggle */}
+          <div className="mb-6 flex justify-center">
+            <ToggleGroup
+              value={[period]}
+              onValueChange={(value) => {
+                if (value.length > 0) {
+                  setPeriod(value[0] as "monthly" | "annual")
+                }
+              }}
+              className="rounded-full border border-white/15 bg-white/5 p-1 backdrop-blur-sm"
+            >
+              <ToggleGroupItem
+                value="monthly"
+                className="rounded-full px-4 text-sm text-zinc-300 data-[state=on]:bg-white data-[state=on]:text-zinc-950"
+              >
+                Monthly
+              </ToggleGroupItem>
+
+              <ToggleGroupItem
+                value="annual"
+                className="rounded-full px-4 text-sm text-zinc-300 data-[state=on]:bg-white data-[state=on]:text-zinc-950"
+              >
+                Annual
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+
           <div className="mx-auto w-full max-w-sm">
             <div className="relative rounded-2xl p-px">
               <div
@@ -127,26 +174,37 @@ export default function CourseMembership() {
               <div className="relative rounded-2xl border border-white/10 bg-zinc-900/80 p-6 backdrop-blur-md">
                 <div className="flex items-end justify-center gap-2">
                   <span className="text-4xl font-semibold tracking-tight text-white">
-                    €29
+                    €{displayPrice}
                   </span>
                   <span className="mb-1.5 text-sm text-zinc-500">/ month</span>
                 </div>
                 <p className="mt-2 text-xs text-zinc-500">
-                  Or save with annual —{" "}
-                  <strong className="font-semibold text-white">
-                    €19/month
-                  </strong>
+                  {isAnnual ? (
+                    <>
+                      Billed annually at{" "}
+                      <strong className="font-semibold text-white">
+                        €{membershipPrice.annual}
+                      </strong>
+                    </>
+                  ) : (
+                    <>
+                      Or save with annual —{" "}
+                      <strong className="font-semibold text-white">
+                        €{Math.round(membershipPrice.annual / 12)}/month
+                      </strong>
+                    </>
+                  )}
                 </p>
               </div>
             </div>
           </div>
 
-          <Link href="/checkout?plan=monthly">
+          <Link href={`/checkout?plan=${period}`}>
             <Button
               size="lg"
-              className="group mt-6 h-12 w-full max-w-sm rounded-xl bg-white text-sm font-semibold text-zinc-950 shadow-lg shadow-indigo-500/20 transition-all hover:scale-[1.02] hover:bg-zinc-100"
+              className="group mt-6 h-12 w-full max-w-sm rounded-xl bg-white text-sm font-semibold text-zinc-950 shadow-lg shadow-white/10 transition-all hover:scale-[1.02] hover:bg-zinc-100"
             >
-              Start for €29 / month
+              Start for €{displayPrice} / month
               <ArrowUpRight className="ml-2 size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Button>
           </Link>
@@ -160,7 +218,21 @@ export default function CourseMembership() {
   )
 }
 
-function FloatingPriceCard() {
+// ---------- Floating price card ----------
+
+type FloatingPriceCardProps = {
+  period: "monthly" | "annual"
+  onPeriodChange: (period: "monthly" | "annual") => void
+  isAnnual: boolean
+  displayPrice: number
+}
+
+function FloatingPriceCard({
+  period,
+  onPeriodChange,
+  isAnnual,
+  displayPrice,
+}: FloatingPriceCardProps) {
   return (
     <div className="relative animate-[float_6s_ease-in-out_infinite]">
       {/* Outer glow */}
@@ -197,25 +269,65 @@ function FloatingPriceCard() {
             </div>
 
             <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold tracking-wider text-emerald-300 uppercase">
-              Best value
+              {isAnnual ? "Save 35%" : "Best value"}
             </span>
           </div>
 
+          {/* Billing toggle */}
+          <div className="relative mt-6">
+            <ToggleGroup
+              value={[period]}
+              onValueChange={(value) => {
+                if (value.length > 0) {
+                  onPeriodChange(value[0] as "monthly" | "annual")
+                }
+              }}
+              className="grid w-full grid-cols-2 rounded-xl border border-white/10 bg-white/5 p-1"
+            >
+              <ToggleGroupItem
+                value="monthly"
+                className="rounded-lg py-1.5 text-xs font-medium text-zinc-400 data-[state=on]:bg-white data-[state=on]:text-zinc-950"
+              >
+                Monthly
+              </ToggleGroupItem>
+
+              <ToggleGroupItem
+                value="annual"
+                className="rounded-lg py-1.5 text-xs font-medium text-zinc-400 data-[state=on]:bg-white data-[state=on]:text-zinc-950"
+              >
+                Annual
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+
           {/* Price */}
-          <div className="relative mt-7">
+          <div className="relative mt-6">
             <p className="text-xs font-medium tracking-wider text-zinc-500 uppercase">
               Start from
             </p>
             <div className="mt-2 flex items-end gap-2">
               <span className="text-5xl font-semibold tracking-tight text-white">
-                €29
+                €{displayPrice}
               </span>
               <span className="mb-2 text-sm text-zinc-500">/ month</span>
             </div>
             <p className="mt-2 text-xs text-zinc-500">
-              Effective{" "}
-              <strong className="font-semibold text-zinc-200">€19/month</strong>{" "}
-              with the annual plan.
+              {isAnnual ? (
+                <>
+                  Billed annually at{" "}
+                  <strong className="font-semibold text-zinc-200">
+                    €{membershipPrice.annual}
+                  </strong>
+                </>
+              ) : (
+                <>
+                  Effective{" "}
+                  <strong className="font-semibold text-zinc-200">
+                    €{Math.round(membershipPrice.annual / 12)}/month
+                  </strong>{" "}
+                  with the annual plan.
+                </>
+              )}
             </p>
           </div>
 
@@ -243,12 +355,15 @@ function FloatingPriceCard() {
           </ul>
 
           {/* CTA */}
-          <Link href="/pricing" className="relative mt-7 block">
+          <Link
+            href={`/checkout?plan=${period}`}
+            className="relative mt-7 block"
+          >
             <Button
               size="lg"
-              className="group h-12 w-full rounded-xl bg-white text-sm font-semibold text-zinc-950 shadow-lg shadow-indigo-500/20 transition-all hover:scale-[1.02] hover:bg-zinc-100 hover:shadow-indigo-500/40"
+              className="group h-12 w-full rounded-xl bg-white text-sm font-semibold text-zinc-950 shadow-lg shadow-white/10 transition-all hover:scale-[1.02] hover:bg-zinc-100 hover:shadow-white/20"
             >
-              Start for €29 / month
+              Start for €{displayPrice} / month
               <ArrowUpRight className="ml-2 size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Button>
           </Link>
