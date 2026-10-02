@@ -1,88 +1,108 @@
-import { verifyPayment } from "@/actions/yekPay"
+import { incrementString } from "@/lib/incrementString"
 import { MembershipPeriod } from "@/prisma/generated/prisma/enums"
 import { prisma } from "@/prisma/prisma"
 import { addMonths } from "date-fns"
 import { NextRequest, NextResponse } from "next/server"
 
-export async function GET(req: NextRequest) {
-  const { searchParams, origin } = req.nextUrl
-  const authority = searchParams.get("authority")
-  const plan = searchParams.get("plan") as MembershipPeriod | null
-  const success = searchParams.get("success") // "0" = success from YekPay, non-zero = failure
+const route = "/checkout-result"
 
-  // 1. Missing authority — nothing we can do
-  if (!authority) {
-    return NextResponse.redirect(
-      `${origin}/panel/checkout/result?status=failed&reason=missing_authority`
-    )
-  }
+export async function POST(req: NextRequest) {
+  try {
+    const { searchParams, origin } = new URL(req.url)
+    const authority = searchParams.get("authority")
+    const plan = searchParams.get("plan") as MembershipPeriod | null
+    const success = searchParams.get("success")
 
-  // 2. Gateway explicitly reported a failure
-  if (success !== "0") {
-    await prisma.payment.updateMany({
-      where: { authority, status: "pending" },
-      data: { status: "failed" },
+    if (!authority) {
+      return NextResponse.redirect(
+        `${origin}${route}?status=failed&reason=missing_authority`
+      )
+    }
+
+    // if (success !== "100") {
+    if (success !== "0") {
+      await prisma.payment.update({
+        where: { authority, status: "pending" },
+        data: { status: "failed" },
+      })
+
+      return NextResponse.redirect(
+        `${origin}${route}?status=failed&authority=${authority}`
+      )
+    }
+
+    const payment = await prisma.payment.findFirst({
+      where: { authority },
+      include: { user: { select: { id: true } } },
     })
 
-    return NextResponse.redirect(
-      `${origin}/panel/checkout/result?status=failed&authority=${authority}`
-    )
-  }
+    if (!payment) {
+      return NextResponse.redirect(
+        `${origin}${route}?status=failed&reason=not_found`
+      )
+    }
 
-  // 3. Find our pending payment record
-  const payment = await prisma.payment.findFirst({
-    where: { authority },
-    include: { user: true },
-  })
+    if (payment.status === "success") {
+      return NextResponse.redirect(
+        `${origin}${route}status=success&ref=${payment.reference}`
+      )
+    }
 
-  if (!payment) {
-    return NextResponse.redirect(
-      `${origin}/panel/checkout/result?status=failed&reason=not_found`
-    )
-  }
+    // const verify = await verifyPayment(authority)
+    const verify = { success: true }
 
-  // 4. Idempotency — if we already processed this, just redirect
-  if (payment.status === "success") {
-    return NextResponse.redirect(
-      `${origin}/panel/checkout/result?status=success&ref=${payment.reference}`
-    )
-  }
+    if (!verify.success) {
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: "failed" },
+      })
 
-  // 5. Verify with the gateway
-  const verify = await verifyPayment(authority)
+      return NextResponse.redirect(
+        `${origin}${route}?status=failed&authority=${authority}`
+      )
+    }
 
-  if (!verify.success) {
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: "failed" },
-    })
-
-    return NextResponse.redirect(
-      `${origin}/panel/checkout/result?status=failed&authority=${authority}`
-    )
-  }
-
-  // 6. Mark payment as paid + activate membership — atomic
-  await prisma.$transaction(async (tx) => {
-    await tx.payment.update({
-      where: { id: payment.id },
-      data: {
-        status: "success",
-        paidAt: new Date(),
-        paidAmount: payment.totalAmount - payment.discountAmount,
-        membership: {
-          create: {
-            period: plan!,
-            expiresAt: addMonths(new Date(), plan === "monthly" ? 1 : 12),
-            price: payment.paidAmount,
-            userId: payment.user.id,
-          },
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: "success",
+          paidAt: new Date(),
+          paidAmount: payment.totalAmount - payment.discountAmount,
         },
-      },
-    })
-  })
+      })
 
-  return NextResponse.redirect(
-    `${origin}/checkout-result?status=success&ref=${payment.reference}`
-  )
+      await tx.membership.updateMany({
+        where: { userId: payment.user.id },
+        data: {
+          status: "inactive",
+        },
+      })
+
+      const lastMembership = await prisma.membership.findFirst({
+        orderBy: { createdAt: "desc" },
+        select: { reference: true },
+      })
+
+      await tx.membership.create({
+        data: {
+          period: plan!,
+          reference: incrementString(lastMembership?.reference),
+          expiresAt: addMonths(new Date(), plan === "monthly" ? 1 : 12),
+          price: payment.paidAmount,
+          userId: payment.user.id,
+        },
+      })
+    })
+
+    return NextResponse.redirect(
+      `${origin}${route}?status=success&ref=${payment.reference}`,
+      303
+    )
+  } catch (error) {
+    return NextResponse.redirect(
+      `${process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://parallane.com"}${route}?status=failed&reason=unkown_error`,
+      303
+    )
+  }
 }

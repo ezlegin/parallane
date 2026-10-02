@@ -50,8 +50,8 @@ export async function requestPayment(params: PurchaseParams) {
       orderNumber,
       callback:
         process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : "https://parallane.com" + `/api/payment-result?plan=${plan}`,
+          ? `http://localhost:3000/api/payment-result?plan=${plan}`
+          : `https://parallane.com/api/payment-result?plan=${plan}`,
       firstName,
       lastName,
       email,

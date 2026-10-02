@@ -30,6 +30,7 @@ enum MembershipPeriod {
 
 enum MembershipStatus {
   active
+  inactive
   expired
 }
 
@@ -232,7 +233,7 @@ model Lesson {
 
 model Membership {
   id        String @id @default(uuid())
-  reference String @unique @default("par-0012")
+  reference String @unique
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -266,7 +267,7 @@ model Payment {
   membership   Membership? @relation(fields: [membershipId], references: [id], onDelete: Cascade)
 
   status    PaymentStatus @default(pending)
-  authority String?
+  authority String?       @unique
 
   totalAmount    Float
   discountAmount Float

@@ -102,9 +102,11 @@ export default async function PaymentResultPage({
                 ? "Your membership is now active. Enjoy unlimited access to every course."
                 : reason === "missing_authority"
                   ? "The gateway did not send a valid authority token."
-                  : reason === "not_found"
-                    ? "We couldn't locate this payment. Contact support if money was deducted."
-                    : "Your payment could not be verified. If money was deducted, it will be refunded within 48 hours."}
+                  : reason === "unkown_error"
+                    ? "Something Happended. Please try again later. If money was not deducted within 48 hours, Please contact us."
+                    : reason === "not_found"
+                      ? "We couldn't locate this payment. Contact support if money was deducted."
+                      : "Your payment could not be verified. If money was deducted, it will be refunded within 48 hours."}
             </CardDescription>
           </CardHeader>
 
