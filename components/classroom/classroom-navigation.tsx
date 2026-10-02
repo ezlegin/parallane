@@ -3,26 +3,20 @@
 import { ArrowLeft, ArrowRight, Check } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Lesson, Season } from "@/prisma/generated/prisma/client"
 
 type ClassroomNavigationProps = {
-  course: {
-    curriculum: {
-      lessons: {
-        id: string
-        title: string
-      }[]
-    }[]
-  }
+  seasons: (Season & { lessons: Lesson[] })[]
   currentLesson: {
     id: string
   }
 }
 
 export function ClassroomNavigation({
-  course,
+  seasons,
   currentLesson,
 }: ClassroomNavigationProps) {
-  const lessons = course.curriculum.flatMap((season) => season.lessons)
+  const lessons = seasons.flatMap((season) => season.lessons)
 
   const currentIndex = lessons.findIndex(
     (lesson) => lesson.id === currentLesson.id

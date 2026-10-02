@@ -1,37 +1,43 @@
-import { notFound } from "next/navigation"
-
-import { coursesx } from "@/lib/courses"
-
-import { ClassroomHeader } from "@/components/classroom/classroom-header"
-import { ClassroomVideo } from "@/components/classroom/classroom-video"
+import { AskTutor } from "@/components/classroom/ask-tutor"
 import { ClassroomCurriculum } from "@/components/classroom/classroom-curriculum"
+import { ClassroomHeader } from "@/components/classroom/classroom-header"
 import { ClassroomLessonInfo } from "@/components/classroom/classroom-lesson-info"
 import { ClassroomNavigation } from "@/components/classroom/classroom-navigation"
-import { AskTutor } from "@/components/classroom/ask-tutor"
+import { ClassroomVideo } from "@/components/classroom/classroom-video"
+import { prisma } from "@/prisma/prisma"
+import { notFound } from "next/navigation"
 
 type ClassroomPageProps = {
   params: Promise<{
-    courseSlug: string
+    id: string
   }>
 }
 
 export default async function ClassroomPage({ params }: ClassroomPageProps) {
-  const { courseSlug } = await params
+  const { id } = await params
 
-  const course = coursesx.find((course) => course.slug === courseSlug)
+  console.log(id)
 
-  if (!course) {
+  const classroom = await prisma.classroom.findFirst({
+    where: { id },
+    include: {
+      course: {
+        include: {
+          courseProgresses: true,
+          seasons: { include: { lessons: true } },
+        },
+      },
+    },
+  })
+
+  console.log(classroom)
+
+  if (!classroom) {
     notFound()
   }
 
-  /*
-   * For now we select the first lesson.
-   *
-   * Later this should come from the user's progress:
-   *
-   * const currentLesson = await getLastWatchedLesson(...)
-   */
-  const currentLesson = course.curriculum[0]?.lessons[0]
+  const course = classroom.course
+  const currentLesson = course.seasons[0].lessons[0]
 
   if (!currentLesson) {
     return null
@@ -39,7 +45,7 @@ export default async function ClassroomPage({ params }: ClassroomPageProps) {
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)]">
-      <ClassroomHeader course={course} progress={42} />
+      <ClassroomHeader title={course.title} progress={42} />
 
       <div className="mx-auto max-w-[1600px]">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -49,7 +55,7 @@ export default async function ClassroomPage({ params }: ClassroomPageProps) {
             <ClassroomLessonInfo lesson={currentLesson} />
 
             <ClassroomNavigation
-              course={course}
+              seasons={course.seasons}
               currentLesson={currentLesson}
             />
 
@@ -61,7 +67,7 @@ export default async function ClassroomPage({ params }: ClassroomPageProps) {
 
           <aside className="border-t lg:border-t-0 lg:border-l">
             <ClassroomCurriculum
-              curriculum={course.curriculum as any} // todo: fix this any leter.
+              seasons={course.seasons}
               currentLessonId={currentLesson.id}
             />
           </aside>

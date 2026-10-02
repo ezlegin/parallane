@@ -6,13 +6,11 @@ import { Progress } from "@/components/ui/progress"
 import { Separator } from "../ui/separator"
 
 type ClassroomHeaderProps = {
-  course: {
-    title: string
-  }
+  title: string
   progress: number
 }
 
-export function ClassroomHeader({ course, progress }: ClassroomHeaderProps) {
+export function ClassroomHeader({ title, progress }: ClassroomHeaderProps) {
   return (
     <header className="border-b bg-background">
       <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-4 px-4 md:px-6">
@@ -31,7 +29,7 @@ export function ClassroomHeader({ course, progress }: ClassroomHeaderProps) {
           </div>
 
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{course.title}</p>
+            <p className="truncate text-sm font-medium">{title}</p>
 
             <p className="text-xs text-muted-foreground">Your course</p>
           </div>
