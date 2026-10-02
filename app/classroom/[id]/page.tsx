@@ -4,60 +4,91 @@ import { ClassroomHeader } from "@/components/classroom/classroom-header"
 import { ClassroomLessonInfo } from "@/components/classroom/classroom-lesson-info"
 import { ClassroomNavigation } from "@/components/classroom/classroom-navigation"
 import { ClassroomVideo } from "@/components/classroom/classroom-video"
+import { findLesson, findResumeLesson } from "@/lib/classroom"
+import { getSessionUser } from "@/lib/user"
 import { prisma } from "@/prisma/prisma"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 type ClassroomPageProps = {
-  params: Promise<{
-    id: string
-  }>
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ lesson?: string }>
 }
 
-export default async function ClassroomPage({ params }: ClassroomPageProps) {
-  const { id } = await params
+export default async function ClassroomPage({
+  params,
+  searchParams,
+}: ClassroomPageProps) {
+  const user = await getSessionUser()
+  if (!user) redirect("/login")
 
-  console.log(id)
+  const { id } = await params
+  const { lesson: lessonId } = await searchParams
 
   const classroom = await prisma.classroom.findFirst({
-    where: { id },
+    where: { id, userId: user.id },
     include: {
       course: {
         include: {
-          courseProgresses: true,
-          seasons: { include: { lessons: true } },
+          seasons: {
+            orderBy: { order: "asc" },
+            include: {
+              lessons: {
+                orderBy: { order: "asc" },
+                include: {
+                  progress: {
+                    where: { userId: user.id },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
   })
 
-  console.log(classroom)
-
-  if (!classroom) {
-    notFound()
-  }
+  if (!classroom) notFound()
 
   const course = classroom.course
-  const currentLesson = course.seasons[0].lessons[0]
 
-  if (!currentLesson) {
-    return null
-  }
+  // 1. Try the lesson from the URL
+  // 2. Otherwise, resume at the first unwatched lesson
+  const resolved = lessonId
+    ? findLesson(course.seasons, lessonId)
+    : findResumeLesson(course.seasons)
+
+  if (!resolved) return null
+
+  const { season: currentSeason, lesson: currentLesson } = resolved
+
+  // Overall progress
+  const allLessons = course.seasons.flatMap((s) => s.lessons)
+  const completed = allLessons.filter((l) =>
+    l.progress.some((p) => p.completedAt)
+  ).length
+  const progress =
+    allLessons.length === 0
+      ? 0
+      : Math.round((completed / allLessons.length) * 100)
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)]">
-      <ClassroomHeader title={course.title} progress={42} />
+      <ClassroomHeader title={course.title} progress={progress} />
 
       <div className="mx-auto max-w-[1600px]">
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_400px]">
           <main className="min-w-0 p-3">
             <ClassroomVideo lesson={currentLesson} />
+            <div className="flex w-full items-center justify-between border-b">
+              <ClassroomLessonInfo lesson={currentLesson} />
 
-            <ClassroomLessonInfo lesson={currentLesson} />
-
-            <ClassroomNavigation
-              seasons={course.seasons}
-              currentLesson={currentLesson}
-            />
+              <ClassroomNavigation
+                seasons={course.seasons}
+                currentLessonId={currentLesson.id}
+                classroomId={classroom.id}
+                isCompleted={currentLesson.progress.some((p) => p.completedAt)}
+              />
+            </div>
 
             <AskTutor
               courseTitle={course.title}
@@ -69,6 +100,7 @@ export default async function ClassroomPage({ params }: ClassroomPageProps) {
             <ClassroomCurriculum
               seasons={course.seasons}
               currentLessonId={currentLesson.id}
+              defaultSeasonId={currentSeason.id}
             />
           </aside>
         </div>

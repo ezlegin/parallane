@@ -38,10 +38,12 @@ export async function createCourse(values: CourseFormType) {
         teaserUrl: tizerUrl || null,
         duration: +duration,
         seasons: {
-          create: seasons.map((s) => ({
+          create: seasons.map((s, idx) => ({
+            order: idx,
             title: s.title,
             lessons: {
-              create: s.lessons.map((l) => ({
+              create: s.lessons.map((l, idx) => ({
+                order: idx,
                 title: l.title,
                 url: l.url,
                 type: l.type,
@@ -111,13 +113,15 @@ export async function updateCourse(id: string, values: CourseFormType) {
 
       await tx.season.deleteMany({ where: { courseId: id } })
 
-      for (const season of seasons) {
+      for (const [seasonIndex, season] of seasons.entries()) {
         await tx.season.create({
           data: {
+            order: seasonIndex,
             title: season.title,
             courseId: id,
             lessons: {
-              create: season.lessons.map((l) => ({
+              create: season.lessons.map((l, idx) => ({
+                order: idx,
                 title: l.title,
                 url: l.url,
                 type: l.type,

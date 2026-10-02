@@ -1,7 +1,7 @@
 "use client"
 
-import { FormEvent, useState } from "react"
 import { Bot, Send, UserRound } from "lucide-react"
+import { FormEvent, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -41,23 +41,6 @@ export function AskTutor({ courseTitle, lessonTitle }: AskTutorProps) {
     setMessages((current) => [...current, userMessage])
 
     setMessage("")
-
-    /*
-     * Later:
-     *
-     * const response = await fetch("/api/tutor", {
-     *   method: "POST",
-     *   body: JSON.stringify({
-     *     courseTitle,
-     *     lessonTitle,
-     *     message: trimmedMessage,
-     *   }),
-     * })
-     *
-     * const tutorMessage = await response.json()
-     *
-     * setMessages(...)
-     */
   }
 
   return (
@@ -82,7 +65,7 @@ export function AskTutor({ courseTitle, lessonTitle }: AskTutorProps) {
               </div>
 
               <div>
-                <CardTitle className="text-sm">Parallane Tutor</CardTitle>
+                <CardTitle className="text-sm">Alireza Ezlegini</CardTitle>
 
                 <p className="text-xs text-muted-foreground">
                   {courseTitle} · {lessonTitle}
