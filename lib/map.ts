@@ -1,4 +1,7 @@
-import { CourseProgressStatus } from "@/prisma/generated/prisma/enums"
+import {
+  CourseCategory,
+  CourseProgressStatus,
+} from "@/prisma/generated/prisma/enums"
 
 export function mapEnrollmentStatus(stat: CourseProgressStatus) {
   switch (stat) {
@@ -8,5 +11,16 @@ export function mapEnrollmentStatus(stat: CourseProgressStatus) {
       return "In Progress..."
     case "notStarted":
       return "Not Started"
+  }
+}
+
+export function mapCourseCategoryName(category: CourseCategory) {
+  switch (category) {
+    case "backEnd":
+      return "Back-End"
+    case "frontEnd":
+      return "Front-End"
+    case "webDesign":
+      return "Web-Design"
   }
 }

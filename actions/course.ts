@@ -16,6 +16,7 @@ export async function createCourse(values: CourseFormType) {
     seasons,
     tizerUrl,
     duration,
+    learn,
   } = values
 
   try {
@@ -35,6 +36,7 @@ export async function createCourse(values: CourseFormType) {
         category,
         status,
         audience: audience.map((a) => a.value),
+        learn: learn.map((a) => a.value),
         teaserUrl: tizerUrl || null,
         duration: +duration,
         seasons: {
@@ -75,6 +77,7 @@ export async function updateCourse(id: string, values: CourseFormType) {
     seasons,
     tizerUrl,
     duration,
+    learn,
   } = values
 
   try {
@@ -105,6 +108,7 @@ export async function updateCourse(id: string, values: CourseFormType) {
           description,
           category,
           status,
+          learn: learn.map((a) => a.value),
           audience: audience.map((a) => a.value),
           teaserUrl: tizerUrl || null,
           duration: +duration,

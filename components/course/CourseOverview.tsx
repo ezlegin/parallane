@@ -31,8 +31,8 @@ export default function CourseOverview({
             </p>
 
             <div className="mt-10 grid gap-3 sm:grid-cols-2">
-              {learn.map((item) => (
-                <div key={item} className="flex gap-3 rounded-xl border p-4">
+              {learn.map((item, idx) => (
+                <div key={idx} className="flex gap-3 rounded-xl border p-4">
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
                     <Check className="size-3" />
                   </span>

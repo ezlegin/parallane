@@ -46,12 +46,13 @@ export default async function CoursePage({ params }: CoursePageProps) {
       />
 
       <CourseTrailer
+        src={course.teaserUrl ?? ""}
         duration={course.duration.toString()}
         lessonCount={lessonCount}
         level="beginner"
       />
 
-      <CourseOverview description={course.description} learn={["test"]} />
+      <CourseOverview description={course.description} learn={course.learn} />
 
       <CourseCurriculum
         seasons={course.seasons}

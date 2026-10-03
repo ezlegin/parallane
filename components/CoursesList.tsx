@@ -5,11 +5,13 @@ import { ArrowUpRight } from "lucide-react"
 import { cn } from "cn"
 import { homePagePadding } from "@/app/(HOME)/page"
 import { Card } from "./ui/card"
+import { mapCourseCategoryName } from "@/lib/map"
+import { CourseCategory } from "@/prisma/generated/prisma/enums"
 
 interface Course {
   title: string
   slug: string
-  category: string
+  category: CourseCategory
   summary: string
 }
 
@@ -82,7 +84,7 @@ const CoursesList = ({ courses }: { courses: Course[] }) => {
                         variant={"outline"}
                         className="bg-transparent text-muted-foreground"
                       >
-                        {course.category}
+                        {mapCourseCategoryName(course.category)}
                       </Badge>
                     </div>
                   </div>

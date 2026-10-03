@@ -7,6 +7,7 @@ import { SessionProvider } from "next-auth/react"
 import Link from "next/link"
 import { Language, LanguageSample } from "../code-samples"
 import CourseEnrollButton from "./CourseEnrollButton"
+import { mapCourseCategoryName } from "@/lib/map"
 
 interface CourseHeroProps {
   category: CourseCategory
@@ -92,7 +93,7 @@ export default async function CourseHero({
                   <span className="relative inline-flex size-1.5 rounded-full bg-white" />
                 </span>
                 <span className="text-[11px] font-medium tracking-[0.15em] text-zinc-300 uppercase">
-                  {mapCategoryName(category)}
+                  {mapCourseCategoryName(category)}
                 </span>
               </div>
             </div>
@@ -213,15 +214,4 @@ export default async function CourseHero({
       />
     </section>
   )
-}
-
-function mapCategoryName(category: CourseCategory) {
-  switch (category) {
-    case "backEnd":
-      return "Back-End"
-    case "frontEnd":
-      return "Front-End"
-    case "webDesign":
-      return "Web-Design"
-  }
 }

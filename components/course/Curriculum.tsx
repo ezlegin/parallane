@@ -78,6 +78,7 @@ export default function CourseCurriculum({
                       (acc, curr) => acc + curr.duration,
                       0
                     )}
+                    m
                   </div>
                 </div>
               </AccordionTrigger>
@@ -111,6 +112,7 @@ export default function CourseCurriculum({
                         <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
                           <Clock3 className="size-3" />
                           {lesson.duration}
+                          {lesson.duration > 0 && "m"}
                         </span>
                       </div>
                     )

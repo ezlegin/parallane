@@ -78,6 +78,11 @@ export const courseFormSchema = z.object({
       value: z.string().min(1, "Audience item cannot be empty."),
     })
   ),
+  learn: z.array(
+    z.object({
+      value: z.string().min(1, "Learn item cannot be empty."),
+    })
+  ),
   seasons: z.array(seasonSchema),
   tizerUrl: z.url(),
   duration: z.string().min(0),

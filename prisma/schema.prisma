@@ -180,6 +180,7 @@ model Course {
   status   CourseStatus   @default(draft)
 
   audience String[]
+  learn    String[]
 
   teaserUrl String?
   duration  Int     @default(0)

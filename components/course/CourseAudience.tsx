@@ -22,7 +22,7 @@ export default function CourseAudience({ items }: CourseAudienceProps) {
           <div className="space-y-3">
             {items.map((item, index) => (
               <div
-                key={item}
+                key={index}
                 className="flex gap-5 border-b py-3 last:border-b-0"
               >
                 <span className="font-mono text-xs text-muted-foreground">

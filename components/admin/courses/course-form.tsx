@@ -13,6 +13,7 @@ import { Curriculum } from "./curriculum"
 import { createCourse, updateCourse } from "@/actions/course"
 import { handleRes } from "@/lib/handleRes"
 import { useRouter } from "next/navigation"
+import { Courselearn } from "./course-learn"
 
 interface CourseType extends Course {
   seasons: (Season & { lessons: Lesson[] })[]
@@ -36,6 +37,7 @@ export function CourseForm({ course }: Props) {
       audience: course
         ? course.audience.map((a) => ({ value: a }))
         : [{ value: "" }],
+      learn: course ? course.learn.map((a) => ({ value: a })) : [{ value: "" }],
       seasons: course
         ? course.seasons.map((s) => ({
             title: s.title,
@@ -73,6 +75,8 @@ export function CourseForm({ course }: Props) {
       <CourseMedia form={form} />
 
       <CourseAudience form={form} />
+
+      <Courselearn form={form} />
 
       <Curriculum form={form} />
 

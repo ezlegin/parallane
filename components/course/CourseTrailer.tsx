@@ -7,12 +7,14 @@ interface CourseTrailerProps {
   duration: string
   lessonCount: number
   level: string
+  src: string
 }
 
 export default function CourseTrailer({
   duration,
   lessonCount,
   level,
+  src,
 }: CourseTrailerProps) {
   return (
     <section className="border-b pb-16 md:pb-24">
@@ -21,10 +23,8 @@ export default function CourseTrailer({
           <video
             className="aspect-video w-full object-cover"
             controls
-            poster="/course-placeholder.jpg"
-          >
-            <source src="/tizer.mp4" type="video/mp4" />
-          </video>
+            src={src}
+          />
 
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="flex size-16 items-center justify-center rounded-full border bg-background/80 backdrop-blur-md">
