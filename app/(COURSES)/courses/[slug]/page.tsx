@@ -4,6 +4,7 @@ import CourseFAQ from "@/components/course/CourseFAQ"
 import CourseHero from "@/components/course/CourseHero"
 import CourseMembership from "@/components/course/CourseMembership"
 import CourseOverview from "@/components/course/CourseOverview"
+import CourseTrailer from "@/components/course/CourseTrailer"
 import CourseCurriculum from "@/components/course/Curriculum"
 import { FloatingPricingCard } from "@/components/FloatingPriceCard"
 import { prisma } from "@/prisma/prisma"
@@ -35,15 +36,19 @@ export default async function CoursePage({ params }: CoursePageProps) {
   return (
     <main>
       <CourseHero
+        coruseSlug={course.slug}
         courseId={course.id}
-        duration={course.duration}
-        lessonCount={lessonCount}
-        level="beginner"
         category={course.category}
         title={course.title}
         summary={course.summary}
         rating={5}
         reviews={128}
+      />
+
+      <CourseTrailer
+        duration={course.duration.toString()}
+        lessonCount={lessonCount}
+        level="beginner"
       />
 
       <CourseOverview description={course.description} learn={["test"]} />

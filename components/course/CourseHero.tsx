@@ -1,21 +1,11 @@
-import {
-  ArrowDown,
-  ArrowUpRight,
-  Award,
-  BookOpen,
-  Clock3,
-  Play,
-  Star,
-} from "lucide-react"
-
-import GlowingStroke from "@/components/GlowingStroke"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { getSessionUser } from "@/lib/user"
 import { CourseCategory } from "@/prisma/generated/prisma/enums"
 import { prisma } from "@/prisma/prisma"
+import { ArrowDown, ArrowUpRight, Star } from "lucide-react"
 import { SessionProvider } from "next-auth/react"
 import Link from "next/link"
+import { Language, LanguageSample } from "../code-samples"
 import CourseEnrollButton from "./CourseEnrollButton"
 
 interface CourseHeroProps {
@@ -25,11 +15,8 @@ interface CourseHeroProps {
   rating: number
   reviews: number
   students?: number
-  duration: number
-  lessonCount: number
-  level: string
-  trailerUrl?: string
   courseId: string
+  coruseSlug: string
 }
 
 export default async function CourseHero({
@@ -39,11 +26,8 @@ export default async function CourseHero({
   rating,
   reviews,
   students,
-  duration,
-  lessonCount,
-  level,
   courseId,
-  trailerUrl,
+  coruseSlug,
 }: CourseHeroProps) {
   const user = await getSessionUser()
 
@@ -215,54 +199,10 @@ export default async function CourseHero({
           </div>
 
           {/* RIGHT — Trailer + meta (sticky on desktop) */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            {/* Video */}
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 shadow-2xl">
-              <video
-                className="aspect-video w-full object-cover"
-                controls
-                src={"https://dl.igraphical.ir/Courses/Illustrator/tizer.mp4"}
-              />
-
-              {/* Play badge overlay */}
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="flex size-16 items-center justify-center rounded-full border border-white/20 bg-zinc-950/70 backdrop-blur-md">
-                  <Play className="ml-1 size-5 fill-white text-white" />
-                </div>
-              </div>
-            </div>
-
-            {/* Meta grid */}
-            <Card className="relative mt-5 grid grid-cols-2 divide-x divide-white/10 overflow-hidden border-white/10 bg-zinc-900/50 py-5 backdrop-blur-sm sm:grid-cols-4">
-              <GlowingStroke />
-
-              <MetaItem
-                icon={<Clock3 className="size-4" />}
-                value={duration.toString()}
-                label="Duration"
-              />
-
-              <MetaItem
-                icon={<Play className="size-4" />}
-                value={`${lessonCount}`}
-                label="Lessons"
-              />
-
-              <MetaItem
-                icon={<BookOpen className="size-4" />}
-                value={level}
-                label="Level"
-                className="border-t border-white/10 sm:border-t-0"
-              />
-
-              <MetaItem
-                icon={<Award className="size-4" />}
-                value="Included"
-                label="Certificate"
-                className="border-t border-white/10 sm:border-t-0"
-              />
-            </Card>
-          </div>
+          <LanguageSample
+            language={coruseSlug as Language}
+            className="ml-auto w-lg"
+          />
         </div>
       </div>
 
@@ -272,27 +212,6 @@ export default async function CourseHero({
         className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-linear-to-b from-transparent to-background"
       />
     </section>
-  )
-}
-
-interface MetaItemProps {
-  icon: React.ReactNode
-  value: string
-  label: string
-  className?: string
-}
-
-function MetaItem({ icon, value, label, className }: MetaItemProps) {
-  return (
-    <div
-      className={`flex flex-col items-center justify-center text-center ${className ?? ""}`}
-    >
-      <div className="flex items-center gap-1">
-        <div className="flex justify-center text-zinc-400">{icon}</div>
-        <div className="text-sm font-medium text-foreground">{value}</div>
-      </div>
-      <p className="mt-1 text-xs text-zinc-500">{label}</p>
-    </div>
   )
 }
 
