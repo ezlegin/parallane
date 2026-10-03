@@ -28,6 +28,7 @@ import {
   User,
 } from "@/prisma/generated/prisma/client"
 import { format } from "date-fns"
+import { mapEnrollmentStatus } from "@/lib/map"
 
 function EnrollmentCard({
   enrollment,
@@ -113,7 +114,7 @@ function EnrollmentCard({
 
       <CardContent>
         <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-          <span>%{enrollment.progress?.percentage}</span>
+          <span>%{enrollment.progress?.percentage.toFixed()}</span>
           <p className="text-xs text-muted-foreground">
             {enrollment.progress?.completedLessons} /{" "}
             {enrollment.progress?.totalLessons} lessons
@@ -127,7 +128,9 @@ function EnrollmentCard({
 
       <CardFooter>
         <div className="flex w-full items-center justify-between gap-3">
-          <Badge variant="secondary">{enrollment.progress?.stats}</Badge>
+          <Badge variant="secondary">
+            {mapEnrollmentStatus(enrollment.progress?.stats ?? "notStarted")}
+          </Badge>
 
           <span className="font-mono text-xs text-muted-foreground">
             {enrollment.reference}

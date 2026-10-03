@@ -103,6 +103,7 @@ export default async function ClassroomPage({
 
           <aside className="border-t lg:border-t-0 lg:border-l">
             <ClassroomCurriculum
+              classroomId={classroom.id}
               seasons={course.seasons}
               currentLessonId={currentLesson.id}
               defaultSeasonId={currentSeason.id}

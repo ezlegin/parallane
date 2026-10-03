@@ -9,27 +9,61 @@ import {
 import { Button } from "@/components/ui/button"
 import type { SeasonWithLessons } from "@/lib/classroom"
 import { formatDuration } from "@/lib/formatDuration"
+import { getDocUrl } from "@/lib/lesson"
 import { cn } from "@/lib/utils"
+import { LessonType } from "@/prisma/generated/prisma/enums"
 import { CircleCheckBig, Download, FileText, Play } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import { toast } from "../ui/toast"
+import { markLessonComplete } from "@/actions/classroom"
 
 type Props = {
   seasons: SeasonWithLessons[]
   currentLessonId: string
   defaultSeasonId: string
+  classroomId: string
 }
 
 export function ClassroomCurriculum({
   seasons,
   currentLessonId,
   defaultSeasonId,
+  classroomId,
 }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  function goToLesson(lessonId: string) {
+  async function goToLesson(lessonId: string, lessonType: LessonType) {
+    if (lessonType === "doc") {
+      const url = await getDocUrl(lessonId)
+
+      if (!url) {
+        toast.add({
+          title: "Document not found.",
+          type: "error",
+        })
+        return
+      }
+
+      const link = document.createElement("a")
+      link.href = url
+      link.download = ""
+      link.rel = "noopener"
+      link.target = "_blank"
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+
+      await markLessonComplete({
+        classroomId,
+        lessonId,
+      })
+
+      return
+    }
+
     const params = new URLSearchParams(searchParams.toString())
     params.set("lesson", lessonId)
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
@@ -79,7 +113,7 @@ export function ClassroomCurriculum({
                           "h-auto w-full justify-start py-2 text-left",
                           isCurrent && "bg-muted font-medium"
                         )}
-                        onClick={() => goToLesson(lesson.id)}
+                        onClick={() => goToLesson(lesson.id, lesson.type)}
                       >
                         <div className="flex size-7 shrink-0 items-center justify-center">
                           {isDone ? (

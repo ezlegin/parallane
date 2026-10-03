@@ -21,7 +21,11 @@ export async function markLessonComplete({
       return { error: "Classroom not found." }
     }
 
-    // Mark the lesson complete (idempotent)
+    const existingProgress = await prisma.lessonProgress.findFirst({
+      where: { lessonId, classroomId },
+    })
+    if (existingProgress) return { error: "Already Maked as Completed." }
+
     await prisma.lessonProgress.upsert({
       where: {
         userId_lessonId: {
@@ -40,7 +44,6 @@ export async function markLessonComplete({
       },
     })
 
-    // Recompute course progress
     const [total, completed] = await Promise.all([
       prisma.lesson.count({
         where: { season: { courseId: classroom.courseId } },

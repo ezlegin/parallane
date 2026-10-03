@@ -1,17 +1,16 @@
-import { ArrowRight, BookOpen } from "lucide-react"
-import Link from "next/link"
-import { redirect } from "next/navigation"
-
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { mapEnrollmentStatus } from "@/lib/map"
 import { getSessionUser } from "@/lib/user"
 import { prisma } from "@/prisma/prisma"
+import { ArrowRight, BookOpen } from "lucide-react"
+import Link from "next/link"
+import { redirect } from "next/navigation"
 
 export default async function CoursesPage() {
   const user = await getSessionUser()
-
   if (!user) redirect("/login")
 
   const enrollments = await prisma.enrollment.findMany({
@@ -83,7 +82,9 @@ export default async function CoursesPage() {
                   </div>
 
                   {en.progress?.stats && (
-                    <Badge variant="outline">{en.progress.stats}</Badge>
+                    <Badge variant="outline">
+                      {mapEnrollmentStatus(en.progress.stats)}
+                    </Badge>
                   )}
                 </div>
 
@@ -99,7 +100,7 @@ export default async function CoursesPage() {
                   <div className="mb-2 flex justify-between text-sm">
                     <span className="text-muted-foreground">Progress</span>
 
-                    <span>{en.progress?.percentage ?? 0}%</span>
+                    <span>{en.progress?.percentage.toFixed() ?? 0}%</span>
                   </div>
 
                   <Progress value={en.progress?.percentage ?? 0} />
