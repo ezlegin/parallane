@@ -48,7 +48,7 @@ const MessagesList = ({
             </pre>
 
             <p className="px-1 text-[11px] text-muted-foreground">
-              {message.role === "tutor" ? "You" : userFullName} ·{" "}
+              {message.role === "tutor" ? "Tutor" : userFullName} ·{" "}
               {format(message.createdAt, "Pp")}
             </p>
           </div>

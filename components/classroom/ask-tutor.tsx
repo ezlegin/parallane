@@ -10,7 +10,7 @@ import { TutorMessage } from "@/prisma/generated/prisma/client"
 type AskTutorProps = {
   course: { id: string; title: string }
   lessonTitle: string
-  userId: string
+  user: { id: string; name: string }
   messages: TutorMessage[]
   classroomId: string
   conversationId: string | null
@@ -19,7 +19,7 @@ type AskTutorProps = {
 export function AskTutor({
   lessonTitle,
   course,
-  userId,
+  user,
   messages,
   classroomId,
   conversationId,
@@ -60,7 +60,7 @@ export function AskTutor({
               {messages.length === 0 ? (
                 <EmptyTutorState />
               ) : (
-                <MessagesList messages={messages} userFullName={"David"} />
+                <MessagesList messages={messages} userFullName={user.name} />
               )}
             </div>
 
@@ -69,7 +69,7 @@ export function AskTutor({
               conversationId={conversationId}
               role="user"
               courseId={course.id}
-              userId={userId}
+              userId={user.id}
             />
           </CardContent>
         </Card>

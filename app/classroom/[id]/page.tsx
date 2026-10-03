@@ -95,7 +95,7 @@ export default async function ClassroomPage({
               classroomId={classroom.id}
               course={course}
               lessonTitle={currentLesson.title}
-              userId={user.id}
+              user={user}
               messages={classroom.conversation?.messages ?? []}
               conversationId={classroom.conversationId}
             />

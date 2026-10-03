@@ -17,10 +17,12 @@ export default async function CoursesPage() {
   const enrollments = await prisma.enrollment.findMany({
     where: { userId: user.id },
     include: {
+      classroom: { select: { id: true } },
       progress: {
         select: {
           percentage: true,
           stats: true,
+          completedAt: true,
         },
       },
       course: {
@@ -103,12 +105,12 @@ export default async function CoursesPage() {
                   <Progress value={en.progress?.percentage ?? 0} />
                 </div>
 
-                <Link
-                  href={`/classroom/${en.course.title.toLowerCase()}`}
-                  className="block"
-                >
-                  <Button className="mt-6 w-full">
-                    {(en.progress?.percentage ?? 0) === 100
+                <Link href={`/classroom/${en.classroom?.id}`} className="block">
+                  <Button
+                    className="mt-6 w-full"
+                    variant={en.progress?.completedAt ? "outline" : "default"}
+                  >
+                    {en.progress?.completedAt
                       ? "Review course"
                       : "Continue course"}
 
