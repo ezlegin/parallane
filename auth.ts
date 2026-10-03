@@ -35,6 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!exists) {
           return null
         }
+        token.id = exists.id
       }
 
       return token

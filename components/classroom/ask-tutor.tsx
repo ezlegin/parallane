@@ -1,48 +1,29 @@
 "use client"
 
-import { Bot, Send, UserRound } from "lucide-react"
-import { FormEvent, useState } from "react"
+import { UserStar } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import MessagesList from "@/app/admin/qa/[id]/MessagesList"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { cn } from "@/lib/utils"
-
-type Message = {
-  id: string
-  role: "user" | "tutor"
-  content: string
-}
+import ConversationMessageForm from "../forms/ConversationMessageForm"
+import { TutorMessage } from "@/prisma/generated/prisma/client"
 
 type AskTutorProps = {
-  courseTitle: string
+  course: { id: string; title: string }
   lessonTitle: string
+  userId: string
+  messages: TutorMessage[]
+  classroomId: string
+  conversationId: string | null
 }
 
-export function AskTutor({ courseTitle, lessonTitle }: AskTutorProps) {
-  const [message, setMessage] = useState("")
-  const [messages, setMessages] = useState<Message[]>([])
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    const trimmedMessage = message.trim()
-
-    if (!trimmedMessage) {
-      return
-    }
-
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: trimmedMessage,
-    }
-
-    setMessages((current) => [...current, userMessage])
-
-    setMessage("")
-  }
-
+export function AskTutor({
+  lessonTitle,
+  course,
+  userId,
+  messages,
+  classroomId,
+  conversationId,
+}: AskTutorProps) {
   return (
     <section className="py-8 md:py-10">
       <div>
@@ -61,50 +42,35 @@ export function AskTutor({ courseTitle, lessonTitle }: AskTutorProps) {
           <CardHeader className="border-b">
             <div className="flex items-center gap-3">
               <div className="flex size-9 items-center justify-center rounded-full border bg-muted">
-                <Bot className="size-4" />
+                <UserStar className="size-4" />
               </div>
 
               <div>
                 <CardTitle className="text-sm">Alireza Ezlegini</CardTitle>
 
                 <p className="text-xs text-muted-foreground">
-                  {courseTitle} · {lessonTitle}
+                  {course.title} · {lessonTitle}
                 </p>
               </div>
             </div>
           </CardHeader>
 
-          <CardContent className="p-0">
+          <CardContent className="p-3">
             <div className="min-h-65 space-y-6 p-5">
               {messages.length === 0 ? (
                 <EmptyTutorState />
               ) : (
-                messages.map((message) => (
-                  <TutorMessage key={message.id} message={message} />
-                ))
+                <MessagesList messages={messages} userFullName={"David"} />
               )}
             </div>
 
-            <form onSubmit={handleSubmit} className="border-t p-4">
-              <div className="relative">
-                <Textarea
-                  value={message}
-                  onChange={(event) => setMessage(event.target.value)}
-                  placeholder="Ask your tutor anything..."
-                  className="min-h-25 resize-none pr-14"
-                />
-
-                <Button
-                  type="submit"
-                  size="icon"
-                  disabled={!message.trim()}
-                  className="absolute right-3 bottom-3"
-                >
-                  <Send />
-                  <span className="sr-only">Send message</span>
-                </Button>
-              </div>
-            </form>
+            <ConversationMessageForm
+              classroomId={classroomId}
+              conversationId={conversationId}
+              role="user"
+              courseId={course.id}
+              userId={userId}
+            />
           </CardContent>
         </Card>
       </div>
@@ -116,7 +82,7 @@ function EmptyTutorState() {
   return (
     <div className="flex min-h-55 flex-col items-center justify-center text-center">
       <div className="flex size-12 items-center justify-center rounded-full border bg-muted">
-        <Bot className="size-5" />
+        <UserStar className="size-5" />
       </div>
 
       <p className="mt-4 font-medium">How can I help?</p>
@@ -125,27 +91,6 @@ function EmptyTutorState() {
         Ask about something you don't understand, get help with code, or discuss
         what you're learning.
       </p>
-    </div>
-  )
-}
-
-function TutorMessage({ message }: { message: Message }) {
-  const isUser = message.role === "user"
-
-  return (
-    <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-full border bg-muted">
-        {isUser ? <UserRound className="size-4" /> : <Bot className="size-4" />}
-      </div>
-
-      <div
-        className={cn(
-          "max-w-[80%] rounded-xl border px-4 py-3 text-sm leading-6",
-          isUser && "bg-foreground text-background"
-        )}
-      >
-        {message.content}
-      </div>
     </div>
   )
 }

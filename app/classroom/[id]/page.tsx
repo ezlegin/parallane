@@ -27,6 +27,7 @@ export default async function ClassroomPage({
   const classroom = await prisma.classroom.findFirst({
     where: { id, userId: user.id },
     include: {
+      conversation: { include: { messages: true } },
       course: {
         include: {
           seasons: {
@@ -91,8 +92,12 @@ export default async function ClassroomPage({
             </div>
 
             <AskTutor
-              courseTitle={course.title}
+              classroomId={classroom.id}
+              course={course}
               lessonTitle={currentLesson.title}
+              userId={user.id}
+              messages={classroom.conversation?.messages ?? []}
+              conversationId={classroom.conversationId}
             />
           </main>
 

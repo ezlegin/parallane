@@ -1,6 +1,6 @@
 import { ArrowLeft, MessageCircle } from "lucide-react"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 
 import ConversationMessageForm from "@/components/forms/ConversationMessageForm"
 import { Badge } from "@/components/ui/badge"
@@ -10,12 +10,16 @@ import { Separator } from "@/components/ui/separator"
 import { getStatusVariant } from "@/lib/getConversationStatusVariant"
 import { prisma } from "@/prisma/prisma"
 import MessagesList from "./MessagesList"
+import { getSessionUser } from "@/lib/user"
 
 export default async function QAChatPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
+  const user = await getSessionUser()
+  if (!user) redirect("/login")
+
   const { id } = await params
 
   const conversation = await prisma.tutorConversation.findFirst({
@@ -24,7 +28,7 @@ export default async function QAChatPage({
       user: true,
       messages: true,
       lesson: true,
-      course: { select: { title: true } },
+      course: { select: { title: true, id: true } },
     },
   })
 
@@ -90,8 +94,10 @@ export default async function QAChatPage({
 
         <CardFooter className="block p-4">
           <ConversationMessageForm
+            userId={user.id}
+            courseId={conversation.course!.id}
             conversationId={conversation.id}
-            studentName={conversation.user.name}
+            role="tutor"
           />
         </CardFooter>
       </Card>
