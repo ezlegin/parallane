@@ -38,8 +38,10 @@ export async function getContinueLearning(userId: string, limit = 3) {
     orderBy: { enrolledAt: "desc" }, // or enrolledAt
     take: limit,
     include: {
+      classroom: { select: { id: true } },
       course: {
         select: {
+          classrooms: { select: { id: true } },
           id: true,
           slug: true,
           title: true,
@@ -65,7 +67,7 @@ export async function getContinueLearning(userId: string, limit = 3) {
         prisma.lessonProgress.count({
           where: {
             userId,
-            completed: true,
+            completedAt: { not: null },
             lesson: { season: { courseId: course.id } },
           },
         }),
@@ -81,6 +83,7 @@ export async function getContinueLearning(userId: string, limit = 3) {
         progress,
         lessonsCompleted: completed,
         totalLessons,
+        classroom: enrollment.classroom,
       }
     })
   )

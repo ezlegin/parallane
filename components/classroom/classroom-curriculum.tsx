@@ -1,8 +1,5 @@
 "use client"
 
-import { CircleCheckBig, CirclePlay, FileText, Play } from "lucide-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-
 import {
   Accordion,
   AccordionContent,
@@ -13,6 +10,8 @@ import { Button } from "@/components/ui/button"
 import type { SeasonWithLessons } from "@/lib/classroom"
 import { formatDuration } from "@/lib/formatDuration"
 import { cn } from "@/lib/utils"
+import { CircleCheckBig, Download, FileText, Play } from "lucide-react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
 type Props = {
@@ -85,8 +84,6 @@ export function ClassroomCurriculum({
                         <div className="flex size-7 shrink-0 items-center justify-center">
                           {isDone ? (
                             <CircleCheckBig className="size-4 text-emerald-400" />
-                          ) : isCurrent ? (
-                            <CirclePlay className="size-4" />
                           ) : lesson.type === "doc" ? (
                             <FileText className="size-4" />
                           ) : (
@@ -99,7 +96,11 @@ export function ClassroomCurriculum({
                             {lesson.title}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {formatDuration(lesson.duration)}
+                            {lesson.type === "doc" ? (
+                              <Download />
+                            ) : (
+                              formatDuration(lesson.duration)
+                            )}
                           </span>
                         </div>
                       </Button>

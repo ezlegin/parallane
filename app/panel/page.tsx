@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { format } from "date-fns"
 import { ArrowRight, BookOpen, CheckCircle2, Crown, Play } from "lucide-react"
 
-import { Greeting } from "@/components/Geetings"
+import { Greetings } from "@/components/Greetings"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -61,7 +61,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <section>
         <p className="text-sm text-muted-foreground">Dashboard</p>
-        <Greeting name={user.name} />
+        <Greetings name={user.name} />
         <p className="mt-2 text-muted-foreground">
           Continue learning and keep building your skills.
         </p>
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
               Pick up where you left off.
             </p>
           </div>
-          <Link href="/panel/courses">
+          <Link href="/panel/enrollments">
             <Button variant="ghost">
               View all
               <ArrowRight />
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
                 <p className="text-sm text-muted-foreground">
                   You're not enrolled in any courses yet.
                 </p>
-                <Link href="/panel/courses">
+                <Link href="/panel/enrollments">
                   <Button className="mt-4">
                     Browse courses
                     <ArrowRight />
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
                     <Progress value={course.progress} className="mt-3" />
                   </div>
 
-                  <Link href={`/classroom/${course.slug}`}>
+                  <Link href={`/classroom/${course.classroom?.id}`}>
                     <Button>
                       Continue
                       <ArrowRight />

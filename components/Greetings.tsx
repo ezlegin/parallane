@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 
-export function Greeting({ name }: { name: string }) {
+export function Greetings({ name }: { name: string }) {
   const [greeting, setGreeting] = useState("Hello")
 
   useEffect(() => {

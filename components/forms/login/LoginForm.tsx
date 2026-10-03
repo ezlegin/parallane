@@ -50,7 +50,7 @@ export default function LoginForm() {
       handleRes(res, { onSuccess: () => router.push("/login/onboarding") })
     } else {
       const user = await getUserByEmail(data.email)
-      if (!user?.password) {
+      if (user && !user.password) {
         toast.add({
           title: "You should log in with google",
           description:
@@ -58,6 +58,7 @@ export default function LoginForm() {
         })
         return
       }
+
       const res = await signIn("user-login", {
         ...data,
         redirect: false,

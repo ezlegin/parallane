@@ -14,7 +14,7 @@ export function ClassroomHeader({ title, progress }: ClassroomHeaderProps) {
   return (
     <header className="border-b bg-background">
       <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-4 px-4 md:px-6">
-        <Link href="/panel/courses">
+        <Link href="/panel/enrollments">
           <Button variant="ghost" size="icon">
             <ArrowLeft />
             <span className="sr-only">Back to courses</span>
