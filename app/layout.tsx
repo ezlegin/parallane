@@ -1,5 +1,5 @@
 import { Geist_Mono, Inter } from "next/font/google"
-
+import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
@@ -30,6 +30,7 @@ export default function RootLayout({
       )}
     >
       <body>
+        <Analytics />
         <ThemeProvider>
           <ProgressBarProvider>{children}</ProgressBarProvider>
           <Toaster />
