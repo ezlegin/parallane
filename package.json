@@ -13,7 +13,8 @@
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "contract:emit": "prisma contract emit"
+    "contract:emit": "prisma contract emit",
+    "vercel-build": "prisma migrate deploy && prisma generate && tsx prisma/generateAdmin.ts && next build"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
