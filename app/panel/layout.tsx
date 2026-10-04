@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 
+import { MembershipBanner } from "@/components/membership-banner"
 import { PanelSidebar } from "@/components/panel-sidebar"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -7,7 +8,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { getSessionUser } from "@/lib/user"
+import { getActiveMembership, getSessionUser } from "@/lib/user"
 import { SessionProvider } from "next-auth/react"
 import { redirect } from "next/navigation"
 
@@ -20,6 +21,8 @@ export default async function PanelLayout({
   if (!sessionUser?.isOnboardingCompleted) {
     redirect("/onboarding")
   }
+
+  const activeMembership = await getActiveMembership(sessionUser.id)
 
   return (
     <SidebarProvider>
@@ -40,6 +43,8 @@ export default async function PanelLayout({
           </div>
         </main>
       </SidebarInset>
+
+      {!activeMembership && <MembershipBanner />}
     </SidebarProvider>
   )
 }

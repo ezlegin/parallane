@@ -59,7 +59,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section>
+      <section className="animate-in duration-500 fade-in slide-in-from-top-4">
         <p className="text-sm text-muted-foreground">Dashboard</p>
         <Greetings name={user.name} />
         <p className="mt-2 text-muted-foreground">
@@ -72,7 +72,10 @@ export default async function DashboardPage() {
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
-            <Card key={stat.label}>
+            <Card
+              key={stat.label}
+              className="animate-in duration-500 fade-in slide-in-from-bottom-4"
+            >
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">{stat.label}</p>

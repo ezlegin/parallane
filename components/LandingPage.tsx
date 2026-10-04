@@ -10,7 +10,7 @@ import Link from "next/link"
 const LandingPage = () => {
   return (
     <section className={cn(homePagePadding, "mx-auto flex justify-between")}>
-      <div className="flex flex-col items-start justify-center gap-4">
+      <div className="flex animate-in flex-col items-start justify-center gap-4 duration-500 slide-in-from-top-10">
         <Badge variant={"outline"} className="p-4">
           Learn. Build. Ship.
         </Badge>
@@ -44,7 +44,7 @@ const LandingPage = () => {
         </div>
       </div>
 
-      <div>
+      <div className="animate-in duration-500 slide-in-from-right-10">
         <Card className="relative w-lg gap-3 py-3">
           <GlowingStroke />
 
