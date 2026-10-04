@@ -1,4 +1,4 @@
-import { Kw, Plain, Punct, Str } from "./tokens"
+import { Kw, Plain, Punct } from "./tokens"
 
 export function NextJsSample() {
   return (

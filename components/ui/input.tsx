@@ -9,7 +9,7 @@ type InputProps = React.ComponentProps<"input"> & {
 }
 
 function Input({ className, type, label, id, ...props }: InputProps) {
-  const inputId = id ?? React.useId()
+  const inputId = React.useId()
 
   return (
     <div className="relative">

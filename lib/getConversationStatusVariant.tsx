@@ -7,8 +7,5 @@ export function getStatusVariant(status: TutorConversationStatus) {
 
     case "waiting":
       return "warning" as const
-
-    case "closed":
-      return "outline" as const
   }
 }

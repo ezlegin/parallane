@@ -8,6 +8,7 @@ import Link from "next/link"
 import { Language, LanguageSample } from "../code-samples"
 import CourseEnrollButton from "./CourseEnrollButton"
 import { mapCourseCategoryName } from "@/lib/map"
+import { Badge } from "../ui/badge"
 
 interface CourseHeroProps {
   category: CourseCategory
@@ -67,7 +68,7 @@ export default async function CourseHero({
       {/* Animated halo */}
       <div
         aria-hidden
-        className="pointer-events-none absolute top-1/2 left-1/4 h-70 w-70 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-white/10 blur-[80px]"
+        className="pointer-events-none absolute top-1/2 left-1/4 h-70 w-70 -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-foreground/10 blur-[80px]"
       />
 
       {/* Noise */}
@@ -87,19 +88,22 @@ export default async function CourseHero({
           <div className="text-center lg:text-left">
             {/* Category pill with live dot */}
             <div className="flex justify-center lg:justify-start">
-              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
+              <Badge
+                variant={"outline"}
+                className="flex items-center gap-2 rounded-full border border-white/15 bg-foreground/5 px-3 py-4 backdrop-blur-sm"
+              >
                 <span className="relative flex size-1.5">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-40" />
-                  <span className="relative inline-flex size-1.5 rounded-full bg-white" />
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-foreground opacity-40" />
+                  <span className="relative inline-flex size-1.5 rounded-full bg-foreground" />
                 </span>
-                <span className="text-[11px] font-medium tracking-[0.15em] text-zinc-300 uppercase">
+                <span className="font-mono text-[11px] font-medium tracking-[0.15em] text-zinc-300 uppercase">
                   {mapCourseCategoryName(category)}
                 </span>
-              </div>
+              </Badge>
             </div>
 
             {/* Title monument */}
-            <div className="relative mt-6">
+            <div className="relative mt-6 animate-in duration-500 fade-in slide-in-from-left-7">
               {/* Ghost echo — desktop only */}
               <span
                 aria-hidden
@@ -114,7 +118,7 @@ export default async function CourseHero({
             </div>
 
             {/* Decorative rule */}
-            <div className="mt-6 flex items-center justify-center gap-4 lg:justify-start">
+            <div className="mt-4 flex items-center justify-center gap-4 lg:justify-start">
               <div
                 aria-hidden
                 className="h-px w-12 bg-linear-to-r from-transparent to-white/20 md:w-16"
@@ -129,29 +133,22 @@ export default async function CourseHero({
             </div>
 
             {/* Summary */}
-            <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-balance text-zinc-400 md:text-lg md:leading-8 lg:mx-0">
+            <p className="mx-auto mt-4 max-w-xl text-base text-balance text-zinc-400 md:text-lg lg:mx-0">
               {summary}
             </p>
 
             {/* Rating capsule */}
-            <div className="mt-6 flex justify-center lg:justify-start">
-              <div className="flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 backdrop-blur-sm">
-                <div className="flex items-center gap-0.5">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className="size-3.5 fill-white text-white"
-                    />
-                  ))}
-                </div>
+            <div className="mt-4 flex justify-center lg:justify-start">
+              <div className="flex items-center gap-2 rounded-full border border-white/15 bg-foreground/5 px-5 py-2.5 backdrop-blur-sm">
+                <Star className="size-3.5 fill-foreground text-foreground" />
                 <span className="text-sm font-semibold tracking-tight text-white">
-                  {rating}
+                  {rating.toFixed(1)}
                 </span>
-                <span className="h-3 w-px bg-white/20" />
+                <span className="h-3 w-px bg-foreground/20" />
                 <span className="text-xs text-zinc-400">{reviews} reviews</span>
                 {students !== undefined && (
                   <>
-                    <span className="h-3 w-px bg-white/20" />
+                    <span className="h-3 w-px bg-foreground/20" />
                     <span className="text-xs text-zinc-400">
                       {students.toLocaleString()} enrolled
                     </span>
@@ -161,7 +158,7 @@ export default async function CourseHero({
             </div>
 
             {/* CTAs */}
-            <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
               {isUserEnrolled ? (
                 <Link
                   href={`/classroom/${isUserEnrolled.classroom?.id}`}
@@ -185,7 +182,7 @@ export default async function CourseHero({
                 <Button
                   size="lg"
                   variant="ghost"
-                  className="group h-14 w-full rounded-full px-8 text-sm font-medium text-zinc-300 hover:bg-white/5 hover:text-white sm:w-auto"
+                  className="group h-14 w-full rounded-full px-8 text-sm font-medium text-zinc-300 hover:bg-foreground/5 hover:text-white sm:w-auto"
                 >
                   See curriculum
                   <ArrowDown className="ml-2 size-4 transition-transform group-hover:translate-y-0.5" />
@@ -194,16 +191,18 @@ export default async function CourseHero({
             </div>
 
             {/* Whisper */}
-            <p className="mt-6 text-center text-[11px] tracking-wide text-zinc-600 lg:text-left">
-              No commitment · Cancel anytime
+            <p className="mt-4 text-center text-[11px] tracking-wide text-zinc-600 lg:text-left">
+              No commitment
             </p>
           </div>
 
           {/* RIGHT — Trailer + meta (sticky on desktop) */}
-          <LanguageSample
-            language={coruseSlug as Language}
-            className="ml-auto w-lg"
-          />
+          <div className="animate-in duration-500 fade-in slide-in-from-right-7">
+            <LanguageSample
+              language={coruseSlug as Language}
+              className="ml-auto w-lg"
+            />
+          </div>
         </div>
       </div>
 

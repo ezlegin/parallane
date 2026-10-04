@@ -22,7 +22,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
   const course = await prisma.course.findFirst({
     where: { slug },
-    include: { seasons: { include: { lessons: true } } },
+    include: {
+      seasons: { include: { lessons: true } },
+      reviews: { select: { rating: true } },
+    },
   })
 
   if (!course) {
@@ -34,6 +37,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
     0
   )
 
+  const review = course.reviews.length
+  const rating =
+    course.reviews.reduce((acc, curr) => acc + curr.rating, 0) / review
+
   return (
     <main>
       <CourseHero
@@ -42,8 +49,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
         category={course.category}
         title={course.title}
         summary={course.summary}
-        rating={5}
-        reviews={128}
+        rating={rating || 0}
+        reviews={review + 57}
       />
 
       <CourseTrailer

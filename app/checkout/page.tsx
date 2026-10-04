@@ -21,7 +21,5 @@ export default async function CheckoutPage({
     redirect("/login")
   }
 
-  const ipCountry = "UK"
-
-  return <CheckoutForm plan={plan} user={user} ipCountry={ipCountry} />
+  return <CheckoutForm plan={plan} user={user} />
 }

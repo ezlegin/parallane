@@ -2,6 +2,7 @@ import Link from "next/link"
 import ParallaneLogo from "./ParallaneLogo"
 import { Button } from "./ui/button"
 import { Card } from "./ui/card"
+import Rights from "./Rights"
 
 const Footer = () => {
   const navItems = [
@@ -84,7 +85,7 @@ const Footer = () => {
         <div className="my-5 h-px bg-border" />
 
         <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
-          <p>© {new Date().getFullYear()} Parallane. All rights reserved.</p>
+          <Rights />
 
           <div className="flex gap-6">
             <Link
