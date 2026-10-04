@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache"
 
-import { incrementString } from "@/lib/incrementString"
 import { prisma } from "@/prisma/prisma"
 
 export async function markLessonComplete({
@@ -69,21 +68,6 @@ export async function markLessonComplete({
         completedAt: isFinished ? new Date() : null,
       },
     })
-
-    if (isFinished) {
-      const lastCertificate = await prisma.certificate.findFirst({
-        orderBy: { issuedAt: "desc" },
-      })
-
-      await prisma.certificate.create({
-        data: {
-          serial: incrementString(lastCertificate?.serial),
-          courseId,
-          userId,
-          enrollmentId,
-        },
-      })
-    }
 
     revalidatePath(`/classroom/${classroomId}`)
 

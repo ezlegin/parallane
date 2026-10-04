@@ -112,6 +112,7 @@ model User {
   contacts            Contact[]
   accounts            Account[]
   classrooms          Classroom[]
+  reviews             Review[]
 
   @@index([createdAt])
   @@map("users")
@@ -194,10 +195,30 @@ model Course {
   certificates       Certificate[]
   tutorConversations TutorConversation[]
   classrooms         Classroom[]
+  reviews            Review[]
 
   @@index([category])
   @@index([status])
   @@index([createdAt])
+}
+
+model Review {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId     String
+  course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrollmentId String     @unique
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  rating  Int
+  comment String?
+
+  createdAt   DateTime     @default(now())
+  certificate Certificate?
+
+  @@unique([userId, courseId])
+  @@index([courseId])
 }
 
 model Season {
@@ -361,6 +382,7 @@ model Enrollment {
   progress    CourseProgress?
   classroom   Classroom?
   certificate Certificate?
+  review      Review?
 
   @@unique([userId, courseId])
   @@index([userId])
@@ -493,6 +515,9 @@ model Certificate {
 
   courseId String
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  reviewId String @unique
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
   issuedAt DateTime @default(now())
 

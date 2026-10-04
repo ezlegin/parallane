@@ -1,3 +1,4 @@
+import CourseDescription from "@/components/course/course-description"
 import CourseAudience from "@/components/course/CourseAudience"
 import CourseCertificate from "@/components/course/CourseCertificate"
 import CourseFAQ from "@/components/course/CourseFAQ"
@@ -52,14 +53,16 @@ export default async function CoursePage({ params }: CoursePageProps) {
         level="beginner"
       />
 
-      <CourseOverview description={course.description} learn={course.learn} />
+      <CourseDescription description={course.description} />
+
+      <CourseOverview learn={course.learn} />
+
+      <CourseAudience items={course.audience} />
 
       <CourseCurriculum
         seasons={course.seasons}
         duration={course.duration.toString()}
       />
-
-      <CourseAudience items={course.audience} />
 
       <CourseCertificate courseTitle={course.title} />
 
