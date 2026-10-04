@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 
+import { incrementString } from "@/lib/incrementString"
 import { prisma } from "@/prisma/prisma"
 
 export async function markLessonComplete({
@@ -21,38 +22,31 @@ export async function markLessonComplete({
       return { error: "Classroom not found." }
     }
 
+    const { userId, courseId, enrollmentId } = classroom
+
     const existingProgress = await prisma.lessonProgress.findFirst({
       where: { lessonId, classroomId },
     })
     if (existingProgress) return { error: "Already Maked as Completed." }
 
-    await prisma.lessonProgress.upsert({
-      where: {
-        userId_lessonId: {
-          userId: classroom.userId,
-          lessonId,
-        },
-      },
-      create: {
-        userId: classroom.userId,
+    await prisma.lessonProgress.create({
+      data: {
+        userId,
         lessonId,
         classroomId,
-        completedAt: new Date(),
-      },
-      update: {
         completedAt: new Date(),
       },
     })
 
     const [total, completed] = await Promise.all([
       prisma.lesson.count({
-        where: { season: { courseId: classroom.courseId } },
+        where: { season: { courseId }, type: "video" },
       }),
       prisma.lessonProgress.count({
         where: {
-          userId: classroom.userId,
+          userId,
           completedAt: { not: null },
-          lesson: { season: { courseId: classroom.courseId } },
+          lesson: { season: { courseId }, type: "video" },
         },
       }),
     ])
@@ -60,24 +54,9 @@ export async function markLessonComplete({
     const percentage = total === 0 ? 0 : (completed / total) * 100
     const isFinished = total > 0 && completed === total
 
-    await prisma.courseProgress.upsert({
-      where: { enrollmentId: classroom.enrollmentId },
-      create: {
-        enrollmentId: classroom.enrollmentId,
-        userId: classroom.userId,
-        courseId: classroom.courseId,
-        completedLessons: completed,
-        totalLessons: total,
-        percentage,
-        stats: isFinished
-          ? "completed"
-          : completed > 0
-            ? "inProgress"
-            : "notStarted",
-        lastLessonId: lessonId,
-        completedAt: isFinished ? new Date() : null,
-      },
-      update: {
+    await prisma.courseProgress.update({
+      where: { enrollmentId },
+      data: {
         completedLessons: completed,
         totalLessons: total,
         percentage,
@@ -91,9 +70,24 @@ export async function markLessonComplete({
       },
     })
 
+    if (isFinished) {
+      const lastCertificate = await prisma.certificate.findFirst({
+        orderBy: { issuedAt: "desc" },
+      })
+
+      await prisma.certificate.create({
+        data: {
+          serial: incrementString(lastCertificate?.serial),
+          courseId,
+          userId,
+          enrollmentId,
+        },
+      })
+    }
+
     revalidatePath(`/classroom/${classroomId}`)
 
-    return { success: "Lesson marked as complete." }
+    return { success: "Lesson marked as complete.", isFinished }
   } catch (err) {
     console.error("[markLessonComplete]", err)
     return { error: "Failed to mark lesson as complete." }

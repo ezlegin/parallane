@@ -15,14 +15,16 @@ export function isCompleted(lesson: Lesson & { progress: LessonProgress[] }) {
 export function findResumeLesson(seasons: SeasonWithLessons[]) {
   for (const season of seasons) {
     for (const lesson of season.lessons) {
-      if (!isCompleted(lesson)) {
+      if (lesson.type === "video" && !isCompleted(lesson)) {
         return { season, lesson }
       }
     }
   }
 
   const lastSeason = seasons.at(-1)
-  const lastLesson = lastSeason?.lessons.at(-1)
+  const lastLesson = lastSeason?.lessons
+    .filter((l) => l.type === "video")
+    .at(-1)
   return lastSeason && lastLesson
     ? { season: lastSeason, lesson: lastLesson }
     : null
@@ -37,5 +39,5 @@ export function findLesson(seasons: SeasonWithLessons[], lessonId: string) {
 }
 
 export function flattenLessons(seasons: SeasonWithLessons[]) {
-  return seasons.flatMap((s) => s.lessons)
+  return seasons.flatMap((s) => s.lessons).filter((l) => l.type === "video")
 }

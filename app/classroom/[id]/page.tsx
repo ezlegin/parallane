@@ -27,6 +27,7 @@ export default async function ClassroomPage({
   const classroom = await prisma.classroom.findFirst({
     where: { id, userId: user.id },
     include: {
+      enrollment: { include: { progress: true } },
       conversation: { include: { messages: true } },
       course: {
         include: {
@@ -62,19 +63,12 @@ export default async function ClassroomPage({
 
   const { season: currentSeason, lesson: currentLesson } = resolved
 
-  // Overall progress
-  const allLessons = course.seasons.flatMap((s) => s.lessons)
-  const completed = allLessons.filter((l) =>
-    l.progress.some((p) => p.completedAt)
-  ).length
-  const progress =
-    allLessons.length === 0
-      ? 0
-      : Math.round((completed / allLessons.length) * 100)
-
   return (
     <div className="min-h-[calc(100vh-3.5rem)]">
-      <ClassroomHeader title={course.title} progress={progress} />
+      <ClassroomHeader
+        title={course.title}
+        progress={classroom.enrollment.progress?.percentage ?? 0}
+      />
 
       <div className="mx-auto max-w-[1600px]">
         <div className="grid lg:grid-cols-[minmax(0,1fr)_400px]">
@@ -88,6 +82,7 @@ export default async function ClassroomPage({
                 currentLessonId={currentLesson.id}
                 classroomId={classroom.id}
                 isCompleted={currentLesson.progress.some((p) => p.completedAt)}
+                userName={user.name.split(" ")[0]}
               />
             </div>
 
@@ -103,7 +98,6 @@ export default async function ClassroomPage({
 
           <aside className="border-t lg:border-t-0 lg:border-l">
             <ClassroomCurriculum
-              classroomId={classroom.id}
               seasons={course.seasons}
               currentLessonId={currentLesson.id}
               defaultSeasonId={currentSeason.id}

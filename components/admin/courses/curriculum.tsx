@@ -43,20 +43,6 @@ export function Curriculum({ form }: Props) {
             Organize the course into seasons and lessons.
           </p>
         </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() =>
-            appendSeason({
-              title: "",
-              lessons: [],
-            })
-          }
-        >
-          <Plus />
-          Add season
-        </Button>
       </div>
 
       <div className="space-y-5">
@@ -93,6 +79,22 @@ export function Curriculum({ form }: Props) {
             </Button>
           </div>
         )}
+
+        <div className="ml-auto w-fit">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              appendSeason({
+                title: "",
+                lessons: [],
+              })
+            }
+          >
+            <Plus />
+            Add season
+          </Button>
+        </div>
       </div>
     </section>
   )

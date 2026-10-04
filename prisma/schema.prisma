@@ -359,8 +359,9 @@ model Enrollment {
 
   completedAt DateTime?
 
-  progress  CourseProgress?
-  classroom Classroom?
+  progress    CourseProgress?
+  classroom   Classroom?
+  certificate Certificate?
 
   @@unique([userId, courseId])
   @@index([userId])
@@ -483,11 +484,13 @@ model TutorMessage {
 model Certificate {
   id String @id @default(uuid())
 
-  certificateNumber String @unique
-  url               String
+  serial String @unique
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  enrollmentId String     @unique
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
 
   courseId String
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)

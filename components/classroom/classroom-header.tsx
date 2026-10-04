@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { Badge } from "../ui/badge"
 import { Separator } from "../ui/separator"
 
 type ClassroomHeaderProps = {
@@ -35,11 +36,21 @@ export function ClassroomHeader({ title, progress }: ClassroomHeaderProps) {
           </div>
         </div>
 
-        <div className="hidden w-60 items-center gap-3 sm:flex">
-          <Progress value={progress} className="flex-1" />
+        {progress === 100 ? (
+          <Badge className="border-green-500 p-4" variant={"success"}>
+            Completed %100
+          </Badge>
+        ) : (
+          <div className="hidden w-60 items-center gap-3 sm:flex">
+            <Progress
+              value={progress}
+              className="flex-1"
+              indicatorClassname={"bg-red-500"}
+            />
 
-          <span className="text-xs font-medium">{progress}%</span>
-        </div>
+            <span className="text-xs font-medium">{progress.toFixed()}%</span>
+          </div>
+        )}
       </div>
     </header>
   )

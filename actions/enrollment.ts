@@ -65,7 +65,9 @@ export async function createEnrollment(values: EnrollmentFormType) {
           create: {
             courseId,
             userId,
-            totalLessons: course.seasons.flatMap((s) => s.lessons).length,
+            totalLessons: course.seasons
+              .flatMap((s) => s.lessons)
+              .filter((l) => l.type === "video").length,
           },
         },
       },

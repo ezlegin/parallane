@@ -16,20 +16,17 @@ import { CircleCheckBig, Download, FileText, Play } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "../ui/toast"
-import { markLessonComplete } from "@/actions/classroom"
 
 type Props = {
   seasons: SeasonWithLessons[]
   currentLessonId: string
   defaultSeasonId: string
-  classroomId: string
 }
 
 export function ClassroomCurriculum({
   seasons,
   currentLessonId,
   defaultSeasonId,
-  classroomId,
 }: Props) {
   const router = useRouter()
   const pathname = usePathname()
@@ -51,15 +48,9 @@ export function ClassroomCurriculum({
       link.href = url
       link.download = ""
       link.rel = "noopener"
-      link.target = "_blank"
       document.body.appendChild(link)
       link.click()
       link.remove()
-
-      await markLessonComplete({
-        classroomId,
-        lessonId,
-      })
 
       return
     }
@@ -110,14 +101,21 @@ export function ClassroomCurriculum({
                         key={lesson.id}
                         variant="ghost"
                         className={cn(
-                          "h-auto w-full justify-start py-2 text-left",
+                          "h-auto w-full justify-start px-2 py-2 text-left",
                           isCurrent && "bg-muted font-medium"
                         )}
                         onClick={() => goToLesson(lesson.id, lesson.type)}
                       >
-                        <div className="flex size-7 shrink-0 items-center justify-center">
+                        <div
+                          className={cn(
+                            isDone &&
+                              lesson.type === "video" &&
+                              "text-emerald-400",
+                            "flex size-7 shrink-0 items-center justify-center"
+                          )}
+                        >
                           {isDone ? (
-                            <CircleCheckBig className="size-4 text-emerald-400" />
+                            <CircleCheckBig className="size-4" />
                           ) : lesson.type === "doc" ? (
                             <FileText className="size-4" />
                           ) : (
@@ -126,9 +124,7 @@ export function ClassroomCurriculum({
                         </div>
 
                         <div className="flex w-full items-center justify-between">
-                          <span className="truncate text-sm">
-                            {lesson.title}
-                          </span>
+                          <div className="truncate text-sm">{lesson.title}</div>
                           <span className="text-xs text-muted-foreground">
                             {lesson.type === "doc" ? (
                               <Download />

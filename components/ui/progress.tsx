@@ -8,8 +8,12 @@ function Progress({
   children,
   value,
   trackClassName,
+  indicatorClassname,
   ...props
-}: ProgressPrimitive.Root.Props & { trackClassName?: string }) {
+}: ProgressPrimitive.Root.Props & {
+  trackClassName?: string
+  indicatorClassname?: string
+}) {
   return (
     <ProgressPrimitive.Root
       value={value}
@@ -19,7 +23,7 @@ function Progress({
     >
       {children}
       <ProgressTrack className={trackClassName}>
-        <ProgressIndicator />
+        <ProgressIndicator className={indicatorClassname} />
       </ProgressTrack>
     </ProgressPrimitive.Root>
   )

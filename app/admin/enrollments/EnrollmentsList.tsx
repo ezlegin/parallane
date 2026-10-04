@@ -128,7 +128,13 @@ function EnrollmentCard({
 
       <CardFooter>
         <div className="flex w-full items-center justify-between gap-3">
-          <Badge variant="secondary">
+          <Badge
+            variant={
+              enrollment.progress?.stats === "completed"
+                ? "success"
+                : "secondary"
+            }
+          >
             {mapEnrollmentStatus(enrollment.progress?.stats ?? "notStarted")}
           </Badge>
 

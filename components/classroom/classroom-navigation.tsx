@@ -8,14 +8,16 @@ import { markLessonComplete } from "@/actions/classroom"
 import { Button } from "@/components/ui/button"
 import type { SeasonWithLessons } from "@/lib/classroom"
 import { flattenLessons } from "@/lib/classroom"
-import { handleRes } from "@/lib/handleRes"
 import { cn } from "cn"
+import { toast } from "../ui/toast"
+import { handleRes } from "@/lib/handleRes"
 
 type Props = {
   seasons: SeasonWithLessons[]
   currentLessonId: string
   classroomId: string
   isCompleted: boolean
+  userName: string
 }
 
 export function ClassroomNavigation({
@@ -23,6 +25,7 @@ export function ClassroomNavigation({
   currentLessonId,
   classroomId,
   isCompleted,
+  userName,
 }: Props) {
   const router = useRouter()
   const pathname = usePathname()
@@ -48,9 +51,19 @@ export function ClassroomNavigation({
         classroomId,
         lessonId: currentLessonId,
       })
+
+      if (res.isFinished) {
+        toast.add({
+          title: `Congratulations, ${userName}!`,
+          description: "You just completed your course.",
+          type: "success",
+        })
+        return
+      }
+
       handleRes(res)
 
-      if ("success" in res && nextLesson) {
+      if (nextLesson) {
         goToLesson(nextLesson.id)
       }
     })
