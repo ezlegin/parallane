@@ -1,4 +1,4 @@
 export const membershipPrice = {
-  monthly: 29,
-  annual: 228,
+  monthly: 9,
+  annual: 69,
 }

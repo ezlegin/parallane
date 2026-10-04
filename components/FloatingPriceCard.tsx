@@ -97,7 +97,7 @@ export function FloatingPricingCard({
             <p className="mt-2 text-xs text-zinc-500">
               Effective{" "}
               <strong className="font-semibold text-zinc-200">
-                €{membershipPrice.annual / 12}/month
+                €{(membershipPrice.annual / 12).toFixed()}/month
               </strong>{" "}
               with the annual plan.
             </p>

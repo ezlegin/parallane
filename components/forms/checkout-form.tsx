@@ -79,6 +79,10 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
   })
 
   async function onSubmit(values: CheckoutFormType) {
+    if (plan === "annual") {
+      toast.add({ title: "Temporarily unavailable.", type: "warning" })
+      return
+    }
     if (isIran || isUnitedStates) {
       toast.add({
         title: "Payment is currently unavailable for your location.",
@@ -249,11 +253,10 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
             <Globe className="size-4" />
             <AlertDescription className="text-sm leading-6">
               <span className="font-semibold text-foreground">
-                Payments are currently unavailable in your location.
+                We can't process payments from the US.
               </span>{" "}
-              Our current payment provider cannot process payments from the
-              United States. Though you can use a VPN to have another IP than
-              US.
+              This is a limitation of our payment provider, not our platform.
+              Using a VPN to connect from another country will unblock checkout.
             </AlertDescription>
           </Alert>
         )}
