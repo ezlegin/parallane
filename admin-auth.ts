@@ -28,6 +28,22 @@ export const {
         return true
       }
     },
+    async jwt({ token, user }) {
+      if (user) return token
+
+      if (token.sub) {
+        const exists = await prisma.admin.findUnique({
+          where: { id: token.sub },
+          select: { id: true },
+        })
+        if (!exists) {
+          return null
+        }
+        token.id = exists.id
+      }
+
+      return token
+    },
   },
   basePath: "/api/admin-auth",
   cookies: {

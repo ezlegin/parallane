@@ -6,6 +6,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { getSessionAdmin } from "@/lib/admin"
+import { prisma } from "@/prisma/prisma"
 
 export default async function AdminLayout({
   children,
@@ -13,10 +14,20 @@ export default async function AdminLayout({
   children: React.ReactNode
 }) {
   const sessionUser = await getSessionAdmin()
+  const waitingConversations = await prisma.tutorConversation.count({
+    where: { status: "waiting" },
+  })
+  const waitingContacts = await prisma.contact.count({
+    where: { status: "waiting" },
+  })
 
   return (
     <SidebarProvider>
-      <AdminSidebar sessionUser={sessionUser} />
+      <AdminSidebar
+        sessionUser={sessionUser}
+        waitingConversations={waitingConversations}
+        waitingContacts={waitingContacts}
+      />
 
       <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 border-b">

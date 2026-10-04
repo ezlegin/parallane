@@ -58,7 +58,6 @@ enum TutorMessageRole {
 enum TutorConversationStatus {
   replied
   waiting
-  closed
 }
 
 enum ContactStatus {

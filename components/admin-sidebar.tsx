@@ -32,11 +32,16 @@ import { handleAdminLogout } from "@/actions/admin"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { SidebarSeparator } from "@/components/ui/sidebar"
 import { getInitials } from "@/lib/getInitials"
+import { Badge } from "./ui/badge"
 
 export function AdminSidebar({
   sessionUser: user,
+  waitingConversations,
+  waitingContacts,
 }: {
   sessionUser: { fullName: string; email: string } | null
+  waitingConversations: number
+  waitingContacts: number
 }) {
   const pathname = usePathname()
 
@@ -60,10 +65,7 @@ export function AdminSidebar({
                 {nav.items.map((item) => {
                   const Icon = item.icon
 
-                  const isActive =
-                    item.href === "/panel"
-                      ? pathname === "/panel"
-                      : pathname.startsWith(item.href)
+                  const isActive = pathname.startsWith(item.href)
 
                   return (
                     <SidebarMenuItem key={item.href}>
@@ -72,8 +74,26 @@ export function AdminSidebar({
                           isActive={isActive}
                           tooltip={item.title}
                         >
-                          <Icon />
-                          <span>{item.title}</span>
+                          <div className="flex flex-1 items-center gap-2">
+                            <Icon />
+                            <span>{item.title}</span>
+                          </div>
+                          {(item.href === "/admin/qa" ||
+                            item.href === "/admin/contact") &&
+                            (() => {
+                              const isQA = item.href === "/admin/qa"
+                              const count = isQA
+                                ? waitingConversations
+                                : waitingContacts
+
+                              if (count === 0) return null
+
+                              return (
+                                <Badge variant={isQA ? "warning" : "warning"}>
+                                  {count}
+                                </Badge>
+                              )
+                            })()}
                         </SidebarMenuButton>
                       </Link>
                     </SidebarMenuItem>
@@ -116,7 +136,10 @@ export function AdminSidebar({
       <SidebarFooter>
         <SidebarSeparator />
 
-        <div className="flex items-center gap-3 px-2 py-3">
+        <Link
+          href={"/admin/profile"}
+          className="flex items-center gap-3 px-2 py-3"
+        >
           <Avatar className="h-9 w-9 rounded-lg">
             <AvatarFallback className="rounded-lg">
               {getInitials(user?.fullName)}
@@ -130,7 +153,7 @@ export function AdminSidebar({
               {user?.email}
             </p>
           </div>
-        </div>
+        </Link>
 
         <SidebarMenu>
           <SidebarMenuItem>
@@ -211,7 +234,7 @@ const navigation = [
       },
     ],
   },
-]
+] as const
 
 const accountNavigation = [
   {

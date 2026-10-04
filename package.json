@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predev": "tsx prisma/generateAdmin.ts",
     "build": "next build",
+    "prebuild": "tsx prisma/generateAdmin.ts",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",

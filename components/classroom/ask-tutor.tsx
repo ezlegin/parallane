@@ -55,13 +55,11 @@ export function AskTutor({
             </div>
           </CardHeader>
 
+          <MessagesList messages={messages} userFullName={user.name} />
+
           <CardContent className="p-3">
-            <div className="min-h-65 space-y-6 p-5">
-              {messages.length === 0 ? (
-                <EmptyTutorState />
-              ) : (
-                <MessagesList messages={messages} userFullName={user.name} />
-              )}
+            <div className="space-y-6 p-5">
+              {messages.length === 0 && <EmptyTutorState />}
             </div>
 
             <ConversationMessageForm

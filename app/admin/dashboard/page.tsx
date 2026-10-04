@@ -32,14 +32,14 @@ function StatCard({
   icon: React.ElementType
 }) {
   return (
-    <Card>
+    <Card className="gap-1 py-4">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
         <Icon className="size-4 text-muted-foreground" />
       </CardHeader>
-      <CardContent>
+      <CardContent className="py-0 pb-0">
         <div className="text-2xl font-semibold tracking-tight">{value}</div>
         <p className="mt-1 text-xs text-muted-foreground">{description}</p>
       </CardContent>
@@ -122,7 +122,7 @@ export default async function AdminDashboardPage() {
         <StatCard
           title="Q&A"
           value={stats.pendingQuestions}
-          description="Questions waiting for reply"
+          description="waiting Questions"
           icon={HelpCircle}
         />
         <StatCard
@@ -141,7 +141,7 @@ export default async function AdminDashboardPage() {
             href="/admin/qa"
             label="View Q&A"
           />
-          <Card>
+          <Card className="p-0">
             <CardContent className="p-0">
               <div className="divide-y">
                 {pendingQuestions.length === 0 && (
@@ -165,13 +165,15 @@ export default async function AdminDashboardPage() {
                             {lastMessage?.content ?? "No messages yet"}
                           </p>
                         </div>
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {format(q.updatedAt, "PP")}
-                        </span>
+                        <div>
+                          <div className="shrink-0 text-xs text-muted-foreground">
+                            {format(q.updatedAt, "PP")}
+                          </div>
+                          <Badge variant="outline" className="mt-3">
+                            {q.course?.title ?? "General"}
+                          </Badge>
+                        </div>
                       </div>
-                      <Badge variant="outline" className="mt-3">
-                        {q.course?.title ?? "General"}
-                      </Badge>
                     </Link>
                   )
                 })}
@@ -183,7 +185,7 @@ export default async function AdminDashboardPage() {
         {/* Courses */}
         <section>
           <SectionHeader title="Courses" href="/admin/courses" />
-          <Card>
+          <Card className="p-0">
             <CardContent className="p-0">
               <div className="divide-y">
                 {courseOverview.map((course) => {
@@ -222,7 +224,7 @@ export default async function AdminDashboardPage() {
         {/* Recent enrollments */}
         <section>
           <SectionHeader title="Recent enrollments" href="/admin/enrollments" />
-          <Card>
+          <Card className="p-0">
             <CardContent className="p-0">
               <div className="divide-y">
                 {recentEnrollments.map((e) => (
@@ -254,7 +256,7 @@ export default async function AdminDashboardPage() {
         {/* Recent payments */}
         <section>
           <SectionHeader title="Recent payments" href="/admin/payments" />
-          <Card>
+          <Card className="p-0">
             <CardContent className="p-0">
               <div className="divide-y">
                 {recentPayments.map((p) => (
@@ -272,7 +274,13 @@ export default async function AdminDashboardPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
-                      <Badge variant="secondary">{p.status}</Badge>
+                      <Badge
+                        variant={
+                          p.status === "success" ? "success" : "secondary"
+                        }
+                      >
+                        {p.status}
+                      </Badge>
                       <span className="text-sm font-medium">
                         €{p.paidAmount.toLocaleString()}
                       </span>

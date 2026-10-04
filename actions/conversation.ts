@@ -20,7 +20,7 @@ export const createMessage = async (
 
     await prisma.tutorConversation.update({
       where: { id: conversationId },
-      data: { status: "replied" },
+      data: { status: role === "tutor" ? "replied" : "waiting" },
     })
 
     revalidatePath(`/admin/qa/${conversationId}`)
