@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { Card } from "@/components/ui/card"
 import { roadmapsCategory } from "@/lib/roadmaps"
+import { Metadata } from "next"
 
 export default function RoadmapsPage() {
   return (
@@ -82,4 +83,8 @@ export default function RoadmapsPage() {
       </section>
     </main>
   )
+}
+
+export const metadata: Metadata = {
+  title: "Roadmaps",
 }

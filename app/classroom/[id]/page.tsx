@@ -220,3 +220,7 @@ function Feature({ icon, label }: { icon: React.ReactNode; label: string }) {
     </div>
   )
 }
+
+export const metadata = {
+  title: "Classroom",
+}

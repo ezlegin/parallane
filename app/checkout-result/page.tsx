@@ -196,3 +196,7 @@ export default async function PaymentResultPage({
     </main>
   )
 }
+
+export const metadata = {
+  title: "Checkout Result",
+}

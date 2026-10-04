@@ -48,3 +48,7 @@ export default async function PanelLayout({
     </SidebarProvider>
   )
 }
+
+export const metadata = {
+  title: "Panel",
+}

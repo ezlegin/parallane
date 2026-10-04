@@ -14,3 +14,7 @@ export default async function OnboardingPage() {
     />
   )
 }
+
+export const metadata = {
+  title: "Onboarding",
+}

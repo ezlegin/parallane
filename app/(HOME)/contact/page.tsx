@@ -10,3 +10,7 @@ export default async function ContactPage() {
     </div>
   )
 }
+
+export const metadata = {
+  title: "Contact",
+}

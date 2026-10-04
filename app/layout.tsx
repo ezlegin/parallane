@@ -43,7 +43,7 @@ export default function RootLayout({
 export const metadata = {
   title: {
     default: "Parallane",
-    template: "%s | Parallane",
+    template: "%s - Parallane",
   },
   description: "Parallane",
   icons: {

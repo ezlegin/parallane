@@ -8,9 +8,7 @@ type CheckoutPageProps = {
   }>
 }
 
-export default async function CheckoutPage({
-  searchParams,
-}: CheckoutPageProps) {
+export default async function page({ searchParams }: CheckoutPageProps) {
   const params = await searchParams
 
   const plan = params.plan === "annual" ? "annual" : "monthly"
@@ -22,4 +20,8 @@ export default async function CheckoutPage({
   }
 
   return <CheckoutForm plan={plan} user={user} />
+}
+
+export const metadata = {
+  title: "Checkout",
 }
