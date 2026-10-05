@@ -12,7 +12,6 @@ import { User } from "@/prisma/generated/prisma/client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, Globe, LockKeyhole, ShieldCheck } from "lucide-react"
 import Link from "next/link"
-import { redirect } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { SupportCard } from "../SupportCard"
@@ -100,7 +99,11 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
     )
 
     handleRes(res, {
-      onSuccess: () => res.paymentUrl && redirect(res.paymentUrl),
+      onSuccess: () => {
+        if (res.paymentUrl) {
+          window.location.href = res.paymentUrl
+        }
+      },
     })
 
     setIsSubmitting(false)

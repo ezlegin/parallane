@@ -1,0 +1,73 @@
+services:
+  # ============================================
+  # PostgreSQL
+  # ============================================
+  db:
+    image: postgres:16-alpine
+    container_name: parallane-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-parallane}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-parallane}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-parallane}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - parallane
+
+  # ============================================
+  # Next.js app
+  # ============================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: parallane-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Connection — uses the docker network hostname "db"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-parallane}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-parallane}?schema=public
+
+      # Auth
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      AUTH_TRUST_HOST: "true"
+
+      # Admin seed
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_FULL_NAME: ${ADMIN_FULL_NAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+
+      # Public
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+
+      # Email
+      RESEND_API_KEY: ${RESEND_API_KEY}
+
+      # Payments
+      PAYMENT_PROXY_URL: ${PAYMENT_PROXY_URL}
+      PAYMENT_PROXY_SECRET: ${PAYMENT_PROXY_SECRET}
+
+      # Node
+      NODE_ENV: production
+      PORT: "3000"
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    networks:
+      - parallane
+
+volumes:
+  db_data:
+
+networks:
+  parallane:
+    driver: bridge
