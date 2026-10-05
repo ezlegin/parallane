@@ -10,6 +10,8 @@ import { NextJsSample } from "./nextjs-sample"
 import { GitSample } from "./git-sample"
 import { DockerSample } from "./docker-sample"
 import { DesignSample } from "./design-sample"
+import { FigmaBasicSample } from "./figma-basic-sample"
+import { FigmaAdvancedSample } from "./figma-advanced-sample."
 
 export type Language =
   | "html"
@@ -23,6 +25,8 @@ export type Language =
   | "git"
   | "docker"
   | "web-design"
+  | "figma-basic"
+  | "figma-advanced"
 
 const SAMPLES: Record<Language, { label: string; Component: React.FC }> = {
   html: { label: "HTML", Component: HtmlSample },
@@ -36,6 +40,8 @@ const SAMPLES: Record<Language, { label: string; Component: React.FC }> = {
   git: { label: "Git", Component: GitSample },
   docker: { label: "Docker", Component: DockerSample },
   "web-design": { label: "Design", Component: DesignSample },
+  "figma-basic": { label: "Figma", Component: FigmaBasicSample },
+  "figma-advanced": { label: "Figma", Component: FigmaAdvancedSample },
 }
 
 export function LanguageSample({
