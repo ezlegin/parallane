@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (success !== "100") {
+    if (success !== "1") {
       await prisma.payment.update({
         where: { authority, status: "pending" },
         data: { status: "failed" },
