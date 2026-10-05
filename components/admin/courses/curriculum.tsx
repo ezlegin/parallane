@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, Trash2 } from "lucide-react"
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
 import { Controller, useFieldArray } from "react-hook-form"
 
@@ -28,6 +28,7 @@ export function Curriculum({ form }: Props) {
     fields: seasons,
     append: appendSeason,
     remove: removeSeason,
+    move: moveSeason,
   } = useFieldArray({
     control: form.control,
     name: "seasons",
@@ -40,7 +41,8 @@ export function Curriculum({ form }: Props) {
           <h2 className="text-lg font-semibold">Curriculum</h2>
 
           <p className="text-sm text-muted-foreground">
-            Organize the course into seasons and lessons.
+            Organize the course into seasons and lessons. Use the arrows to
+            reorder seasons.
           </p>
         </div>
       </div>
@@ -51,6 +53,10 @@ export function Curriculum({ form }: Props) {
             key={season.id}
             form={form}
             seasonIndex={seasonIndex}
+            isFirst={seasonIndex === 0}
+            isLast={seasonIndex === seasons.length - 1}
+            onMoveUp={() => moveSeason(seasonIndex, seasonIndex - 1)}
+            onMoveDown={() => moveSeason(seasonIndex, seasonIndex + 1)}
             onRemove={() => removeSeason(seasonIndex)}
           />
         ))}
@@ -80,21 +86,23 @@ export function Curriculum({ form }: Props) {
           </div>
         )}
 
-        <div className="ml-auto w-fit">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              appendSeason({
-                title: "",
-                lessons: [],
-              })
-            }
-          >
-            <Plus />
-            Add season
-          </Button>
-        </div>
+        {seasons.length > 0 && (
+          <div className="ml-auto w-fit">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                appendSeason({
+                  title: "",
+                  lessons: [],
+                })
+              }
+            >
+              <Plus />
+              Add season
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   )
@@ -103,10 +111,22 @@ export function Curriculum({ form }: Props) {
 type SeasonFieldProps = {
   form: UseFormReturn<CourseFormType>
   seasonIndex: number
+  isFirst: boolean
+  isLast: boolean
+  onMoveUp: () => void
+  onMoveDown: () => void
   onRemove: () => void
 }
 
-function SeasonField({ form, seasonIndex, onRemove }: SeasonFieldProps) {
+function SeasonField({
+  form,
+  seasonIndex,
+  isFirst,
+  isLast,
+  onMoveUp,
+  onMoveDown,
+  onRemove,
+}: SeasonFieldProps) {
   const {
     fields: lessons,
     append: appendLesson,
@@ -120,30 +140,60 @@ function SeasonField({ form, seasonIndex, onRemove }: SeasonFieldProps) {
     <div className="overflow-hidden rounded-xl border">
       {/* Season header */}
       <div className="flex items-center gap-3 bg-muted/30 p-4">
+        {/* Position badge */}
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-md border bg-background text-xs font-semibold text-muted-foreground tabular-nums">
+          {seasonIndex + 1}
+        </div>
+
         <Controller
           name={`seasons.${seasonIndex}.title`}
           control={form.control}
           render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <div className="grid grid-cols-[1fr_auto] items-center gap-2">
-                <Input
-                  {...field}
-                  aria-invalid={fieldState.invalid}
-                  label={`Season ${seasonIndex + 1}`}
-                  className="w-full min-w-0 flex-1 rounded-none border-x-0 border-t-0 bg-transparent focus-visible:ring-0"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={onRemove}
-                >
-                  <Trash2 />
-                </Button>
-              </div>
+            <Field data-invalid={fieldState.invalid} className="flex-1">
+              <Input
+                {...field}
+                aria-invalid={fieldState.invalid}
+                label={`Season ${seasonIndex + 1}`}
+                className="w-full min-w-0 rounded-none border-x-0 border-t-0 bg-transparent focus-visible:ring-0"
+              />
             </Field>
           )}
         />
+
+        {/* Reorder + delete */}
+        <div className="flex shrink-0 items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={isFirst}
+            onClick={onMoveUp}
+          >
+            <ChevronUp />
+            <span className="sr-only">Move season up</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={isLast}
+            onClick={onMoveDown}
+          >
+            <ChevronDown />
+            <span className="sr-only">Move season down</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onRemove}
+          >
+            <Trash2 />
+            <span className="sr-only">Remove season</span>
+          </Button>
+        </div>
       </div>
 
       <Separator />
@@ -182,6 +232,7 @@ function SeasonField({ form, seasonIndex, onRemove }: SeasonFieldProps) {
   )
 }
 
+// LessonField — unchanged, keep as-is
 type LessonFieldProps = {
   form: UseFormReturn<CourseFormType>
   seasonIndex: number
@@ -210,6 +261,7 @@ function LessonField({
             <Trash2 />
             <span className="sr-only">Remove lesson</span>
           </Button>
+
           <Controller
             name={`${baseName}.title`}
             control={form.control}
@@ -250,7 +302,6 @@ function LessonField({
 
                   <SelectContent>
                     <SelectItem value="video">Video</SelectItem>
-
                     <SelectItem value="doc">Document</SelectItem>
                   </SelectContent>
                 </Select>
