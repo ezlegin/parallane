@@ -14,6 +14,7 @@ import { createCourse, updateCourse } from "@/actions/course"
 import { handleRes } from "@/lib/handleRes"
 import { useRouter } from "next/navigation"
 import { Courselearn } from "./course-learn"
+import { useEffect } from "react"
 
 interface CourseType extends Course {
   seasons: (Season & { lessons: Lesson[] })[]
@@ -65,6 +66,14 @@ export function CourseForm({ course }: Props) {
       onSuccess: () => !course && router.push("/admin/courses"),
     })
   }
+
+  const curriclum = form.watch("seasons")
+  const lessons = curriclum.flatMap((c) => c.lessons)
+
+  useEffect(() => {
+    const totalDuration = lessons.reduce((acc, curr) => acc + +curr.duration, 0)
+    form.setValue("duration", totalDuration.toString())
+  }, [lessons])
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-10">

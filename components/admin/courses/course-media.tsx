@@ -57,6 +57,7 @@ export function CourseMedia({ form }: Props) {
                 step={1}
                 min={0}
                 placeholder="120"
+                readOnly
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
