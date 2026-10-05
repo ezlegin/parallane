@@ -16,10 +16,11 @@ type Props = {
 
 export function CountryOnboardingForm({ userId }: Props) {
   const router = useRouter()
-  const [selectedCountry, setSelectedCountry] = useState("US")
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   function onSubmit() {
+    if (!selectedCountry) return
     startTransition(async () => {
       handleRes(await setOnboarding(userId, { country: selectedCountry }), {
         onSuccess: () => router.push("/panel"),

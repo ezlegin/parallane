@@ -223,16 +223,8 @@ export function BillingInformationCard({
               href="/terms"
               className="underline underline-offset-4 hover:text-foreground"
             >
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/privacy"
-              className="underline underline-offset-4 hover:text-foreground"
-            >
-              Privacy Policy
+              Privacy & Terms of Service.
             </Link>
-            .
           </p>
 
           <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">

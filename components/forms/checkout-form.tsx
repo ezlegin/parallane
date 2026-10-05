@@ -4,6 +4,7 @@ import { startPayment } from "@/actions/checkout"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/toast"
+import { getCouponByCode } from "@/lib/coupon"
 import { CheckoutFormType, checkoutSchemaSchema } from "@/lib/formSchema"
 import { handleRes } from "@/lib/handleRes"
 import { membershipPrice } from "@/lib/membership"
@@ -11,13 +12,12 @@ import { User } from "@/prisma/generated/prisma/client"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowLeft, Globe, LockKeyhole, ShieldCheck } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { redirect } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { SupportCard } from "../SupportCard"
 import { BillingInformationCard } from "./BillingInformationCard"
 import { BillingSummaryCard } from "./BillingSummaryCard"
-import { getCouponByCode } from "@/lib/coupon"
 
 type CheckoutFormProps = {
   plan: "monthly" | "annual"
@@ -47,7 +47,6 @@ const benefits = [
 ]
 
 export function CheckoutForm({ plan, user }: CheckoutFormProps) {
-  const router = useRouter()
   const selectedPlan = plans[plan]
 
   const [appliedCoupon, setAppliedCoupon] = useState<{
@@ -101,7 +100,7 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
     )
 
     handleRes(res, {
-      onSuccess: () => res.paymentUrl && router.push(res.paymentUrl),
+      onSuccess: () => res.paymentUrl && redirect(res.paymentUrl),
     })
 
     setIsSubmitting(false)

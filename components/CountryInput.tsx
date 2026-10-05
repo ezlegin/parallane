@@ -34,14 +34,14 @@ export const formattedCountries: Country[] = Object.keys(countries)
   }))
   .sort((a, b) => a.label.localeCompare(b.label))
 
-export function getCountry(code?: string) {
+export function getCountry(code?: string | null) {
   if (!code) return undefined
   return formattedCountries.find((c) => c.value === code)
 }
 
 // ---------- Props ----------
 type CountryInputProps = {
-  value?: string
+  value?: string | null
   onChange: (value: string) => void
   onBlur?: () => void
   disabled?: boolean
