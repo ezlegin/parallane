@@ -54,9 +54,7 @@ const CoursesList = ({ courses }: { courses: Course[] }) => {
             {courses.map((course, idx) => (
               <Card key={course.title} className="rounded-sm p-0">
                 <Link
-                  href={`/courses/${course.title
-                    .toLowerCase()
-                    .replaceAll(" ", "-")}`}
+                  href={`/courses/${course.slug.toLowerCase()}`}
                   className="group relative flex flex-col items-center justify-between gap-4 border-b p-5 transition-colors last:border-b-0 hover:bg-muted/30"
                 >
                   {/* Number */}
