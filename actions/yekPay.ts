@@ -3,8 +3,6 @@
 import { MembershipPeriod, User } from "@/prisma/generated/prisma/client"
 import axios from "axios"
 
-const yekpayMerchantId = process.env.YEKPAY_MERCHANT_ID
-
 interface PurchaseParams {
   user: Omit<User, "password">
   amount: number
@@ -18,6 +16,13 @@ interface PurchaseParams {
   country: string
   city: string
   plan: MembershipPeriod
+}
+
+const paymentProxyUrl = process.env.PAYMENT_PROXY_URL
+const paymentProxySecret = process.env.PAYMENT_PROXY_SECRET
+
+const paymentHeaders = {
+  Authorization: `Bearer ${paymentProxySecret}`,
 }
 
 export async function requestPayment(params: PurchaseParams) {
@@ -36,39 +41,42 @@ export async function requestPayment(params: PurchaseParams) {
     plan,
   } = params
 
-  const requestPaymentUrl =
-    process.env.NODE_ENV === "development"
-      ? "https://api.ypsapi.com/api/sandbox/request"
-      : "https://gate.ypsapi.com/api/payment/request"
-
   try {
-    const response = await axios.post(requestPaymentUrl, {
-      merchantId: yekpayMerchantId,
-      amount: amount.toFixed(2),
-      fromCurrencyCode: "978",
-      toCurrencyCode: "978",
-      orderNumber,
-      callback:
-        process.env.NODE_ENV === "development"
-          ? `http://localhost:3000/api/payment-result?plan=${plan}`
-          : `https://parallane.com/api/payment-result?plan=${plan}`,
-      firstName,
-      lastName,
-      email,
-      mobile,
-      address,
-      postalCode,
-      country,
-      city,
-      description: `Payment Id: ${orderNumber} - User Id: ${user.id}`,
-    })
+    const response = await axios.post(
+      `${paymentProxyUrl}/request`,
+      {
+        amount: amount.toFixed(2),
+        fromCurrencyCode: "978",
+        toCurrencyCode: "978",
+        orderNumber,
+
+        callback:
+          process.env.NODE_ENV === "development"
+            ? `http://localhost:3000/api/payment-result?plan=${plan}`
+            : `https://parallane.com/api/payment-result?plan=${plan}`,
+
+        firstName,
+        lastName,
+        email,
+        mobile,
+        address,
+        postalCode,
+        country,
+        city,
+
+        description: `Payment Id: ${orderNumber} - User Id: ${user.id}`,
+      },
+      {
+        headers: paymentHeaders,
+      }
+    )
 
     const data = response.data
 
     if (data.Code === 100 && data.Authority) {
       const paymentUrl =
         (process.env.NODE_ENV === "development"
-          ? `https://api.ypsapi.com/api/sandbox/payment/`
+          ? "https://api.ypsapi.com/api/sandbox/payment/"
           : `https://gate.ypsapi.com/api/payment/start/`) + data.Authority
 
       return {
@@ -76,15 +84,16 @@ export async function requestPayment(params: PurchaseParams) {
         paymentUrl,
         authority: data.Authority,
       }
-    } else {
-      return {
-        success: false,
-        error: data.Description || "Unknown error from YekPay API",
-        code: data.Code,
-      }
+    }
+
+    return {
+      success: false,
+      error: data.Description || "Unknown error from YekPay API",
+      code: data.Code,
     }
   } catch (error: any) {
-    console.error(error)
+    console.error(error.response?.data || error.message)
+
     return {
       success: false,
       error: error.response?.data || error.message,
@@ -93,18 +102,22 @@ export async function requestPayment(params: PurchaseParams) {
 }
 
 export async function verifyPayment(authority: string) {
-  if (!authority) return { error: "Authory is needed" }
+  if (!authority) {
+    return {
+      error: "Authority is needed",
+    }
+  }
 
   try {
-    const verifyPaymentUrl =
-      process.env.NODE_ENV === "development"
-        ? "https://api.ypsapi.com/api/sandbox/verify"
-        : "https://gate.ypsapi.com/api/payment/verify"
-
-    const response = await axios.post(verifyPaymentUrl, {
-      merchantId: yekpayMerchantId,
-      authority,
-    })
+    const response = await axios.post(
+      `${paymentProxyUrl}/verify`,
+      {
+        authority,
+      },
+      {
+        headers: paymentHeaders,
+      }
+    )
 
     const data = response.data
 
@@ -113,15 +126,18 @@ export async function verifyPayment(authority: string) {
         success: true,
         authority,
       }
-    } else {
-      return {
-        success: false,
-        error: data.Description || "Unknown error from YekPay API",
-        code: data.Code,
-      }
     }
-  } catch (error) {
-    console.error(error)
-    return { error: String(error) }
+
+    return {
+      success: false,
+      error: data.Description || "Unknown error from YekPay API",
+      code: data.Code,
+    }
+  } catch (error: any) {
+    console.error(error.response?.data || error.message)
+
+    return {
+      error: error.response?.data || error.message,
+    }
   }
 }

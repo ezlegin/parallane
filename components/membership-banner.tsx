@@ -56,7 +56,7 @@ export function MembershipBanner({
             Unlock every course
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            From €{membershipPrice.monthly}/month
+            From €{membershipPrice.monthly.toFixed()}/month
           </p>
         </div>
 

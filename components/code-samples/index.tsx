@@ -9,6 +9,7 @@ import { NodeSample } from "./node-sample"
 import { NextJsSample } from "./nextjs-sample"
 import { GitSample } from "./git-sample"
 import { DockerSample } from "./docker-sample"
+import { DesignSample } from "./design-sample"
 
 export type Language =
   | "html"
@@ -21,6 +22,7 @@ export type Language =
   | "nextjs"
   | "git"
   | "docker"
+  | "web-design"
 
 const SAMPLES: Record<Language, { label: string; Component: React.FC }> = {
   html: { label: "HTML", Component: HtmlSample },
@@ -33,6 +35,7 @@ const SAMPLES: Record<Language, { label: string; Component: React.FC }> = {
   nextjs: { label: "Next.js", Component: NextJsSample },
   git: { label: "Git", Component: GitSample },
   docker: { label: "Docker", Component: DockerSample },
+  "web-design": { label: "Design", Component: DesignSample },
 }
 
 export function LanguageSample({

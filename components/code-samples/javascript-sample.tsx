@@ -30,12 +30,44 @@ export function JavaScriptSample() {
       <Punct>()</Punct>
       <Punct>)</Punct>
       {"\n\n"}
+      <Kw>function</Kw> <Plain>summary</Plain>
+      <Punct>(</Punct>
+      <Plain>skills</Plain>
+      <Punct>)</Punct> {" {"}
+      {"\n"}
+      <Plain>{"  "}</Plain>
+      <Kw>return</Kw> <Punct>{"{"}</Punct>
+      {"\n"}
+      <Plain>{"    "}</Plain>
+      <Plain>count</Plain>
+      <Punct>:</Punct> <Plain>skills</Plain>
+      <Punct>.</Punct>
+      <Plain>length</Plain>
+      <Punct>,</Punct>
+      {"\n"}
+      <Plain>{"    "}</Plain>
+      <Plain>top</Plain>
+      <Punct>:</Punct> <Plain>skills</Plain>
+      <Punct>[</Punct>
+      <Str>0</Str>
+      <Punct>]</Punct>
+      <Punct>,</Punct>
+      {"\n"}
+      <Plain>{"  "}</Plain>
+      <Punct>{"}"}</Punct>
+      {"\n"}
+      <Punct>{"}"}</Punct>
+      {"\n\n"}
       <Plain>console</Plain>
       <Punct>.</Punct>
       <Plain>log</Plain>
       <Punct>(</Punct>
+      <Plain>summary</Plain>
+      <Punct>(</Punct>
       <Plain>upper</Plain>
-      <Punct>)</Punct>
+      <Punct>))</Punct>
+      {"\n"}
+      <Punct>{"//"}</Punct> <Str>{'→ { count: 2, top: "REACT" }'}</Str>
     </>
   )
 }

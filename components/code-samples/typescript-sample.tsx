@@ -34,6 +34,32 @@ export function TypeScriptSample() {
       <Kw>return</Kw> <Str>{"`Hello, ${dev.name}`"}</Str>
       {"\n"}
       <Punct>{"}"}</Punct>
+      {"\n\n"}
+      <Kw>const</Kw> <Plain>alex</Plain> <Punct>=</Punct> <Punct>{"{"}</Punct>
+      {"\n"}
+      <Plain>{"  "}</Plain>
+      <Plain>name</Plain>
+      <Punct>:</Punct> <Str>{'"Alex"'}</Str>
+      <Punct>,</Punct>
+      {"\n"}
+      <Plain>{"  "}</Plain>
+      <Plain>stack</Plain>
+      <Punct>:</Punct> <Punct>[</Punct>
+      <Str>{'"React"'}</Str>
+      <Punct>]</Punct>
+      <Punct>,</Punct>
+      {"\n"}
+      <Plain>{"  "}</Plain>
+      <Plain>years</Plain>
+      <Punct>:</Punct> <Str>3</Str>
+      <Punct>,</Punct>
+      {"\n"}
+      <Punct>{"}"}</Punct>
+      {"\n\n"}
+      <Plain>greet</Plain>
+      <Punct>(</Punct>
+      <Plain>alex</Plain>
+      <Punct>)</Punct>
     </>
   )
 }
