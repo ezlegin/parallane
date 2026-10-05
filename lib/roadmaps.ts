@@ -10,24 +10,24 @@ export const roadmaps = {
     courses: [
       {
         title: "Web Design Principles",
-        slug: "web-design-principles",
-        duration: "4h 20m",
+        slug: "web-design",
+        duration: "2h",
         description:
           "Learn the principles behind hierarchy, composition, typography, spacing, and visual communication.",
       },
       {
-        title: "Figma",
-        slug: "figma",
-        duration: "6h 40m",
+        title: "Figma Basic",
+        slug: "figma-basic",
+        duration: "2h",
         description:
-          "Learn how to turn ideas into polished interfaces, wireframes, prototypes, and reusable design systems.",
+          "Go from opening Figma for the first time to designing clean, structured interfaces with confidence.",
       },
       {
-        title: "UI Design",
-        slug: "ui-design",
-        duration: "7h 30m",
+        title: "Figma Advanced",
+        slug: "figma-advanced",
+        duration: "6h 40m",
         description:
-          "Bring everything together and learn how to design modern interfaces that are clear, usable, and visually strong.",
+          "Go beyond the basics and learn the tools professionals use to ship products.",
       },
     ],
   },

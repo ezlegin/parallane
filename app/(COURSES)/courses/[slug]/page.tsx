@@ -55,7 +55,7 @@ export default async function page({ params }: CoursePageProps) {
         category={course.category}
         title={course.title}
         summary={course.summary}
-        rating={rating || 0}
+        rating={rating || 5}
         reviews={review + 57}
       />
 
