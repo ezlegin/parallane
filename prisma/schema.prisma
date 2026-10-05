@@ -283,8 +283,9 @@ model Membership {
 }
 
 model Payment {
-  id        String @id @default(uuid())
-  reference String @unique
+  id          String @id @default(uuid())
+  reference   String @unique
+  orderNumber Int    @default(autoincrement())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

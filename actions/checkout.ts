@@ -80,7 +80,7 @@ export const startPayment = async (
       firstName,
       lastName,
       mobile: phoneNumber || "",
-      orderNumber: newPayment.id.toString(),
+      orderNumber: String(newPayment.orderNumber + 100),
       amount: paidAmount,
       postalCode: postalCode || "",
       plan: period,

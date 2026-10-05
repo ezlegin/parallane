@@ -79,10 +79,6 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
   })
 
   async function onSubmit(values: CheckoutFormType) {
-    if (plan === "annual") {
-      toast.add({ title: "Temporarily unavailable.", type: "warning" })
-      return
-    }
     if (isIran || isUnitedStates) {
       toast.add({
         title: "Payment is currently unavailable for your location.",
@@ -243,7 +239,8 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
               </span>{" "}
               با توجه به محدودیت‌های قانونی و الزامات ارائه‌دهنده خدمات پرداخت،
               در حال حاضر امکان تکمیل خرید برای کاربران واقع در ایران فراهم
-              نیست.
+              نیست. برای خرید اشتراک از ایران، می توانید با ایمیل ما در ارتباط
+              باشید: parallane.com@gmail.com
             </AlertDescription>
           </Alert>
         )}
@@ -270,7 +267,6 @@ export function CheckoutForm({ plan, user }: CheckoutFormProps) {
               selectedCountry={selectedCountry}
               onCountryChange={setSelectedCountry}
               isSubmitting={isSubmitting}
-              disabled={isIran || isUnitedStates}
               onSubmit={onSubmit}
             />
           </section>

@@ -1,9 +1,8 @@
+import { membershipPrice } from "@/lib/membership"
 import { ArrowUpRight, BookOpen, Check, Shield, Zap } from "lucide-react"
 import Link from "next/link"
 import { Button } from "./ui/button"
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group"
-import { toast } from "./ui/toast"
-import { membershipPrice } from "@/lib/membership"
 
 type FloatingPriceCardProps = {
   period: "monthly" | "annual"
@@ -64,13 +63,6 @@ export function PriceCard({
               value={[period]}
               onValueChange={(value) => {
                 if (value.length > 0) {
-                  if (value.includes("annual")) {
-                    toast.add({
-                      title: "Temporarily unavailable.",
-                      type: "warning",
-                    })
-                    return
-                  }
                   onPeriodChange(value[0] as "monthly" | "annual")
                 }
               }}

@@ -203,9 +203,7 @@ export default function MembershipCard() {
             </Button>
           </Link>
 
-          <p className="mt-4 text-[11px] text-zinc-600">
-            No commitment. Cancel in one click.
-          </p>
+          <p className="mt-4 text-[11px] text-zinc-600">No commitment.</p>
         </div>
       </div>
     </section>

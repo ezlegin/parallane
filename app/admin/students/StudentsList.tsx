@@ -128,7 +128,7 @@ export default function StudentsList({ students }: { students: UserType[] }) {
 
                 {/* Joined */}
                 <TableCell>
-                  <p className="text-sm">{format(student.createdAt, "PP")}</p>
+                  <p className="text-sm">{format(student.createdAt, "PPp")}</p>
                 </TableCell>
 
                 {/* Actions */}
