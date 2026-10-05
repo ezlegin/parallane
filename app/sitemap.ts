@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next"
-
 import { prisma } from "@/prisma/prisma"
+
+export const dynamic = "force-dynamic"
+export const revalidate = 3600 // regenerate once an hour
 
 const baseUrl = "https://parallane.com"
 
