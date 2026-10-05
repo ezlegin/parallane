@@ -47,6 +47,7 @@ export const startPayment = async (
         country,
         phoneNumber,
         postalCode,
+        isOnboardingCompleted: true,
       },
     })
 

@@ -1,4 +1,5 @@
 import MembershipBadge from "@/components/MembershipBadge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -71,10 +72,10 @@ export default async function StudentPage({ params }: Props) {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center">
-              <div className="flex size-20 items-center justify-center rounded-full border bg-muted text-lg font-medium">
-                {getInitials(student.name)}
-              </div>
-
+              <Avatar className={"size-40"}>
+                <AvatarImage src={student.image ?? ""} />
+                <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
+              </Avatar>
               <h2 className="mt-4 font-semibold">{student.name}</h2>
 
               <p className="mt-1 text-sm text-muted-foreground">

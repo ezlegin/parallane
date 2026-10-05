@@ -1,28 +1,20 @@
 "use client"
 
 import { ArrowRight } from "lucide-react"
-import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useState, useTransition } from "react"
 
 import { setOnboarding } from "@/actions/student"
 import { CountryInput } from "@/components/CountryInput"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { handleRes } from "@/lib/handleRes"
 
 type Props = {
-  firstName: string
   userId: string
 }
 
-export function CountryOnboardingForm({ firstName, userId }: Props) {
+export function CountryOnboardingForm({ userId }: Props) {
   const router = useRouter()
   const [selectedCountry, setSelectedCountry] = useState("US")
   const [isPending, startTransition] = useTransition()
@@ -36,18 +28,8 @@ export function CountryOnboardingForm({ firstName, userId }: Props) {
   }
 
   return (
-    <Card className="overflow-hidden rounded-3xl border-border/80 bg-card/95 shadow-2xl shadow-black/4 backdrop-blur-xl">
-      <CardHeader className="px-6 pb-2 sm:px-10">
-        <CardTitle className="text-2xl font-bold tracking-tight sm:text-3xl">
-          {firstName ? `Welcome, ${firstName}!` : "Welcome to Parallane!"}
-        </CardTitle>
-        <CardDescription className="max-w-sm text-sm leading-6">
-          We're glad you're here. Before you begin your learning journey, tell
-          us which country you're from.
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="px-6 pb-6 sm:px-10">
+    <Card className="overflow-hidden rounded-3xl rounded-t-none border-t-0 border-border/80 bg-card/95 shadow-2xl shadow-black/4 backdrop-blur-xl">
+      <CardContent className="px-6 sm:px-10">
         <div className="space-y-2">
           <div className="text-sm font-semibold">
             Which country are you from?

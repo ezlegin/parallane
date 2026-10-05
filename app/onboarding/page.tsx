@@ -37,12 +37,12 @@ export default async function OnboardingPage() {
         }}
       />
 
-      <div className="relative z-10 mx-auto w-full max-w-xl space-y-6">
+      <div className="relative z-10 mx-auto w-full max-w-xl">
         {/* Welcome card */}
         <WelcomeCard firstName={firstName} />
 
         {/* Existing onboarding form */}
-        <CountryOnboardingForm firstName={firstName} userId={user.id} />
+        <CountryOnboardingForm userId={user.id} />
 
         <p className="text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} Parallane. Learn. Build. Grow.
@@ -56,7 +56,7 @@ export default async function OnboardingPage() {
 
 function WelcomeCard({ firstName }: { firstName: string }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-linear-to-b from-muted/40 to-background px-6 py-6 shadow-xl sm:px-8">
+    <div className="relative overflow-hidden rounded-3xl rounded-b-none border border-b-0 border-border/60 bg-linear-to-b from-muted/40 to-background px-6 py-6 shadow-xl sm:px-8">
       {/* Emerald halo */}
       <div
         aria-hidden
@@ -73,12 +73,7 @@ function WelcomeCard({ firstName }: { firstName: string }) {
         <div className="min-w-0 flex-1">
           <h1 className="text-xl leading-tight font-semibold tracking-[-0.02em] sm:text-2xl">
             {firstName ? (
-              <>
-                Hey {firstName},{" "}
-                <span className="text-base text-muted-foreground">
-                  Welcome to Parallane.
-                </span>
-              </>
+              <>Hey {firstName}, </>
             ) : (
               <>
                 Let's build{" "}
@@ -90,7 +85,8 @@ function WelcomeCard({ firstName }: { firstName: string }) {
           </h1>
 
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            One quick step, then you're in.
+            We're glad you're here. Before you begin your learning journey, tell
+            us which country you're from.
           </p>
         </div>
       </div>

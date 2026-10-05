@@ -72,19 +72,18 @@ export async function POST(req: NextRequest) {
         data: {
           status: "success",
           paidAt: new Date(),
-          paidAmount: payment.totalAmount - payment.discountAmount,
         },
       })
 
       if (payment.discountCode) {
         const code = payment.discountCode
-        const existingCoupon = await prisma.coupon.findFirst({
+        const existingCoupon = await tx.coupon.findFirst({
           where: { code },
         })
 
         if (!existingCoupon) return { error: "Coupon code is not valid." }
 
-        await prisma.couponUsage.create({
+        await tx.couponUsage.create({
           data: {
             discountAmount: payment.discountAmount,
             paymentId: payment.id,
@@ -93,7 +92,7 @@ export async function POST(req: NextRequest) {
           },
         })
 
-        await prisma.coupon.update({
+        await tx.coupon.update({
           where: { code: existingCoupon.code },
           data: {
             usageCount: { increment: 1 },
@@ -108,7 +107,7 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      const lastMembership = await prisma.membership.findFirst({
+      const lastMembership = await tx.membership.findFirst({
         orderBy: { createdAt: "desc" },
         select: { reference: true },
       })
