@@ -3,6 +3,9 @@
 import { MembershipPeriod, User } from "@/prisma/generated/prisma/client"
 import axios from "axios"
 
+const environment =
+  process.env.NODE_ENV === "development" ? "sandbox" : "production"
+
 interface PurchaseParams {
   user: Omit<User, "password">
   amount: number
@@ -45,6 +48,7 @@ export async function requestPayment(params: PurchaseParams) {
     const response = await axios.post(
       `${paymentProxyUrl}/request`,
       {
+        environment,
         amount: amount.toFixed(2),
         fromCurrencyCode: "978",
         toCurrencyCode: "978",
