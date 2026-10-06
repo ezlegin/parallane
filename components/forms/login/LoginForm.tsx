@@ -47,7 +47,24 @@ export default function LoginForm() {
   async function onSubmit(data: FormType) {
     if (isSignUp) {
       const res = await createStudent(data as Required<FormType>)
-      handleRes(res, { onSuccess: () => router.push("/login/onboarding") })
+      handleRes(res, {
+        onSuccess: async () => {
+          const res = await signIn("user-login", {
+            ...data,
+            redirect: false,
+          })
+
+          if (res.error) {
+            toast.add({
+              title: "Something Happended.",
+              description: "Please login first.",
+              type: "error",
+            })
+          }
+
+          router.push("/onboarding")
+        },
+      })
     } else {
       const user = await getUserByEmail(data.email)
       if (user && !user.password) {

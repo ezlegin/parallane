@@ -117,6 +117,7 @@ export async function verifyPayment(authority: string) {
       `${paymentProxyUrl}/verify`,
       {
         authority,
+        environment,
       },
       {
         headers: paymentHeaders,
