@@ -6,6 +6,7 @@ WORKDIR /app
 # ---------- deps ----------
 FROM base AS deps
 COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma
 RUN pnpm install --frozen-lockfile
 
 # ---------- builder ----------
@@ -30,11 +31,11 @@ RUN addgroup -S -g 1001 nodejs \
 # Copy the whole built app so prisma CLI + tsx are available at runtime
 COPY --from=builder --chown=nextjs:nodejs /app ./
 
-COPY --chown=nextjs:nodejs docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY --chown=nextjs:nodejs entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 USER nextjs
 EXPOSE 3000
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["pnpm", "start"]
